@@ -1,13 +1,47 @@
+@font-face {
+  font-family: 'Noto Sans JP';   /* フォント名 */
+  src: url('../public/font/NotoSansJP.ttf') format('truetype');   /* フォントファイル */
+}
+
+@font-face {
+  font-family: 'DiaPro';   /* フォント名 */
+  src: url('../public/font/DiaPro-Regular.ttf') format('truetype');   /* フォントファイル */
+}
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: 'Noto Sans JP';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+.DiaPro{
+  font-family: 'DiaPro';
+}
+
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+
+.text {
+  display: inline-block;
+  white-space: nowrap;
+  transform-origin: left;
+  min-width:100%;
+  text-align-last: justify;
+}
+*{
+  box-sizing: border-box;
+}
+
+/*モーダルスライドイン*/
+.modal-enter {
+  transform: translateY(100%);
+}
+
+.modal-enter-active {
+  transform: translateY(0);
+  transition: transform 1000ms;
 }
