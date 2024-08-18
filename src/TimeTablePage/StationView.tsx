@@ -1,6 +1,7 @@
 import {GetStopTime, StopTime, TrainType, Trip} from "../DiaData/DiaData";
 import {useEffect} from "react";
 import {TimeTablePageSetting} from "./TimeTablePage";
+import {redirect} from "react-router-dom";
 
 
 export interface StationProps{
@@ -11,6 +12,7 @@ export interface StationProps{
 interface StationViewProps{
     stations:StationProps[];
     setting:TimeTablePageSetting;
+    direction:number;
 
 }
 export function getStationViewWidth(setting:TimeTablePageSetting){
@@ -18,7 +20,7 @@ export function getStationViewWidth(setting:TimeTablePageSetting){
 }
 
 
-export function StationView({stations,setting}:StationViewProps){
+export function StationView({stations,setting,direction}:StationViewProps){
     useEffect(() => {
         stations.forEach((station) => {
             const element = document.getElementById(`text-${station.rsID}`);
@@ -27,13 +29,28 @@ export function StationView({stations,setting}:StationViewProps){
                 element.style.transform = `scaleX(${scale})`;
             }
         });
-    }, [stations]);
+    }, [stations,direction]);
+    console.log(stations.slice().reverse());
+    function stationList(){
+        if(direction===0){
+            return stations;
+        }else{
+            return stations.slice().reverse();
+        }
+    }
+    function stationStyle(station:StationProps){
+        if(direction===0){
+            return (station.style %16);
+        }else{
+            return (Math.floor(station.style/16) %16);
+        }
+    }
 
     return (
         <div  style={{padding:'0px 5px',flexShrink:0,textAlign:"center",fontSize:`${setting.fontSize}px`,lineHeight:`${setting.fontSize*1.2}px`}}>
             {
-                stations.map((station)=> {
-                        switch (station.style % 16) {
+                stationList().map((station,_i)=> {
+                        switch (stationStyle(station)){
                             case 1:
                             case 2:
                                 return (
@@ -43,7 +60,10 @@ export function StationView({stations,setting}:StationViewProps){
                                         height: `${setting.fontSize * 1.2}px`,
                                         lineHeight: `${setting.fontSize * 1.2}px`
                                     }} key={station.rsID}>
-                                        <span id={`text-${station.rsID}`} className="text">{station.name}</span>
+                                        <span id={`text-${station.rsID}`} className="text">
+                                                                                    {station.name}
+
+                                        </span>
                                     </div>
                                 );
                             case 3:

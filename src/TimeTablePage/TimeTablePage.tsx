@@ -41,17 +41,12 @@ export default function TimeTablePage() {
 
     const navigate=useNavigate();
     const [setting,setSetting]=useState<TimeTablePageSetting>({
-        fontSize:15
+        fontSize:20
     });
     const [openRouteSelect,setOpenRouteSelect]=useState<boolean>(false);
     const param = useParams<{ routeID:string,direct: string  }>();
     const routeID=parseInt(param.routeID??"0");
     const direct=parseInt(param.direct??"0");
-
-
-
-
-
     function download(){
         const a = document.createElement('a');
         const blob = new Blob([JSON.stringify(trainTypes)], { "type" : "application/json" });
@@ -112,6 +107,13 @@ export default function TimeTablePage() {
     async function loadCompany():Promise<Company>{
         return await fetchGzipJson(`/company.json.gz`);
     }
+    function getTrips() {
+        if(direct===0){
+            return routes[routeID].downTrips;
+        }else{
+            return routes[routeID].upTrips;
+        }
+    }
 
     useEffect(() => {
         window.onscroll=(e=>{
@@ -145,7 +147,7 @@ export default function TimeTablePage() {
     });
     return (
         <div style={{fontSize:`${setting.fontSize}px`,lineHeight:`${setting.fontSize*1.2}px`}}>
-            <div style={{display: "flex", width: '100%', height: '100%',paddingBottom:"20px"}}>
+            <div style={{display: "flex", width: '100%', height: '100%',paddingBottom:"70px"}}>
                 <div style={{
                     width: `${getStationViewWidth(setting)}px`,
                     borderRight: "2px solid black",
@@ -156,8 +158,8 @@ export default function TimeTablePage() {
                     zIndex: "10"
 
                 }}>
-                    <div>列車番号</div>
-                    <div style={{borderBottom:'1px solid black'}}>列車種別</div>
+                    <div style={{textAlign:'center'}}>列車番号</div>
+                    <div style={{textAlign:'center',borderBottom:'1px solid black'}}>列車種別</div>
                 </div>
                 <div style={{
                     width: `${getStationViewWidth(setting)}px`,
@@ -166,9 +168,9 @@ export default function TimeTablePage() {
                     paddingTop: `${getTripNameViewHeight(setting)}px`,
                     background: "white"
                 }} id="stationViewLayout">
-                    <StationView stations={getStationProps()} setting={setting}/>
+                    <StationView stations={getStationProps()} setting={setting} direction={direct}/>
                 </div>
-                <div style={{flexShrink: 1, flexGrow: 1}}>
+                <div style={{flexShrink: 1, flexGrow: 1,paddingRight:'30px'}}>
                     <div id="tripNameLayout" style={{
                         borderBottom: "2px solid black",
                         display: 'flex',
@@ -178,7 +180,7 @@ export default function TimeTablePage() {
                         height: `${getTripNameViewHeight(setting)}px`
                     }}>
                         {
-                            routes[routeID].downTrips.map((trip) =>
+                            getTrips().map((trip) =>
                                 <TripNameView key={trip.tripID} trip={trip} type={trainTypes[trip.trainTypeID]}
                                               setting={setting}/>
                             )}
@@ -191,9 +193,10 @@ export default function TimeTablePage() {
                             paddingTop: `${getTripNameViewHeight(setting)}px`
                         }} id="tripTimeLayout">
                             {
-                                routes[routeID].downTrips.map((trip) =>
+                               getTrips().map((trip) =>
                                     <TripView key={trip.tripID} trip={trip} type={trainTypes[trip.trainTypeID]}
-                                              setting={setting} stations={getStationProps()}/>
+                                              setting={setting} stations={getStationProps()}
+                                    direction={direct}/>
                                 )}
                         </div>
                     </div>
@@ -202,30 +205,57 @@ export default function TimeTablePage() {
 
             </div>
             <div style={{display: "flex",position: 'fixed',bottom: 0,width:'100%',backgroundColor:"#FFF"}}>
-                <Button variant={"contained"} style={{width: 0, flexGrow: 1, textAlign: 'center'}}
-                onClick={()=>setOpenRouteSelect(true)}>
-                    開く
+                <Button sx={{m:1}} variant={"contained"} style={{width: 0, flexGrow: 1, textAlign: 'center'}}
+                    onClick={()=>setOpenRouteSelect(true)}>
+                    路線
                 </Button>
 
-                <div style={{width: 0, flexGrow: 1, textAlign: 'center'}}>
-                            <svg viewBox="0 0 64 64" width="48" height="48" stroke={"#52a8ff"} strokeWidth={2} style={{backgroundColor:'black'}}>
-                                <rect width="36" height="32" x="7" y="21" rx="4"></rect>
-                                <rect width="28" height="18" x="11" y="24" rx="4"></rect>
-                                <circle cx="36" cy="47" r="2.5"></circle>
-                                <circle cx="14" cy="47" r="2.5"></circle>
-                                <line x1="57" x2="42" y1="11" y2="22"></line>
-                                <line x1="57" x2="42" y1="41" y2="52"></line>
-                                <line x1="23" x2="8" y1="11" y2="22"></line>
-                            </svg>
-                </div>
-                <div style={{width: 0, flexGrow: 1, textAlign: 'center'}}>下り時刻表</div>
-                <div style={{width: 0, flexGrow: 1, textAlign: 'center'}}>ダイヤグラム</div>
+                    <Button sx={{m:1}} variant={"contained"} style={{width: 0, flexGrow: 1, textAlign: 'center'}}
+                            onClick={()=>{
+                                navigate(`/TimeTable/${routeID}/0}`);
+                            }}>
+                        下り
+                    </Button>
+
+                    {/*<svg viewBox="0 0 64 64" width="48" height="48" stroke={"#52a8ff"} strokeWidth={2} style={{backgroundColor:'black'}}>*/}
+                            {/*    <rect width="36" height="32" x="7" y="21" rx="4"></rect>*/}
+                            {/*    <rect width="28" height="18" x="11" y="24" rx="4"></rect>*/}
+                            {/*    <circle cx="36" cy="47" r="2.5"></circle>*/}
+                            {/*    <circle cx="14" cy="47" r="2.5"></circle>*/}
+                            {/*    <line x1="57" x2="42" y1="11" y2="22"></line>*/}
+                            {/*    <line x1="57" x2="42" y1="41" y2="52"></line>*/}
+                            {/*    <line x1="23" x2="8" y1="11" y2="22"></line>*/}
+                            {/*</svg>*/}
+                    <Button sx={{m:1}} variant={"contained"} style={{width: 0, flexGrow: 1, textAlign: 'center'}}
+                            onClick={()=>{
+                                navigate(`/TimeTable/${routeID}/1}`);
+                            }}>
+                        上り
+                    </Button>
+
+                    {/*<svg viewBox="0 0 64 64" width="48" height="48" stroke={"#52a8ff"} strokeWidth={2} style={{backgroundColor:'black'}}>*/}
+                    {/*    <rect width="36" height="32" x="21" y="21" rx="4"></rect>*/}
+                    {/*    <rect width="28" height="18" x="25" y="24" rx="4"></rect>*/}
+                    {/*    <circle cx="28" cy="47" r="2.5"></circle>*/}
+                    {/*    <circle cx="50" cy="47" r="2.5"></circle>*/}
+                    {/*    <line x1="7" x2="22" y1="11" y2="22"></line>*/}
+                    {/*    <line x1="7" x2="22" y1="41" y2="52"></line>*/}
+                    {/*    <line x1="41" x2="56" y1="11" y2="22"></line>*/}
+                    {/*</svg>*/}
+                    <Button  sx={{m:1}} variant={"contained"} style={{width: 0, flexGrow: 1, textAlign: 'center'}}
+                            onClick={()=>setOpenRouteSelect(true)}>
+                        ダイヤ
+                    </Button>
+
+                    {/*<svg viewBox="0 0 64 64" width="48" height="48" stroke={"#52a8ff"} strokeWidth={2} style={{backgroundColor:'black'}}>*/}
+                    {/*    <path d="M8 8 l10 12 l12 0 l26 36 M56 8 l-12 24 l-8 0 l-12 24 M8 30 l12 0l11 -22" ></path>*/}
+                    {/*</svg>*/}
             </div>
 
             <Modal
                 id={"routeSelect"}
                 open={openRouteSelect}
-                onClose={()=>setOpenRouteSelect(false)}
+                onClose={() => setOpenRouteSelect(false)}
                 aria-labelledby="modal-modal-title"
                 aria-describedby="modal-modal-description"
             >

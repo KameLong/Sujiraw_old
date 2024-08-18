@@ -8,9 +8,11 @@ interface TripViewProps{
     type:TrainType;
     stations:StationProps[];
     setting:TimeTablePageSetting;
+    direction:number;
+
 }
 
-export function TripView({trip,type,setting,stations}:TripViewProps){
+export function TripView({trip,type,setting,stations,direction}:TripViewProps){
     function timeIntStr(time:number){
         const ss=time%60;
         time-=ss;
@@ -21,7 +23,7 @@ export function TripView({trip,type,setting,stations}:TripViewProps){
         const hh=time%24;
         return `${hh.toString().padStart(1,'0')}${mm.toString().padStart(2,'0')}`;
     }
-    function depTimeStr(time:StopTime){
+    function depTimeStr(time:StopTime,_i:number){
         switch (time.stopType) {
             case 0:
                 return "‥";
@@ -30,10 +32,22 @@ export function TripView({trip,type,setting,stations}:TripViewProps){
             case 3:
                 return "║";
             default:
+                if(showAri(_i)){
+                   if(_i<stations.length-1){
+                       switch (getTimes()[_i+1].stopType){
+                           case 0:
+                               return "‥";
+                           case 3:
+                               return "║";
+                       }
+                   }else{
+                       return "‥";
+                   }
+                }
                 return timeIntStr(GetStopTime.GetDepAriTime(time));
         }
     }
-    function ariTimeStr(time:StopTime){
+    function ariTimeStr(time:StopTime,_i:number){
         switch (time.stopType) {
             case 0:
                 return "‥";
@@ -42,38 +56,66 @@ export function TripView({trip,type,setting,stations}:TripViewProps){
             case 3:
                 return "║";
             default:
+                if(showDep(_i)){
+                    if(_i>0){
+                        switch (getTimes()[_i-1].stopType){
+                            case 0:
+                                return "‥";
+                            case 3:
+                                return "║";
+                        }
+                    }else{
+                        return "‥";
+                    }
+                }
+
                 return timeIntStr(GetStopTime.GetAriDepTime(time));
         }
     }
     function showAri(index:number):boolean{
-        return ((stations[index].style%16) & 0b0010)!==0;
+        return ((getStations()[index].style%16) & 0b0010)!==0;
     }
     function showDep(index:number):boolean{
-        return ((stations[index].style%16) & 0b0001)!==0;
+        return ((getStations()[index].style%16) & 0b0001)!==0;
     }
+    function getStations(){
+        if(direction===0){
+            return stations;
+        }else{
+            return stations.slice().reverse();
+        }
+    }
+    function getTimes(){
+        if(direction===0){
+            return trip.times;
+        }else{
+            return trip.times.slice().reverse();
+        }
+    }
+
 
     return (
         <div className={"DiaPro"} style={{color:type.color,borderRight:'1px solid gray',width:(setting.fontSize*2.2)+'px',flexShrink:0,textAlign:"center",fontSize:`${setting.fontSize}px`,lineHeight:`${setting.fontSize*1.2}px`}}>
             {
-                trip.times.map((time,_i)=>{
+                getTimes().map((time,_i)=>{
                     return (
                         <div key={time.rsID}>
                             {
                                 (showAri(_i)&&showDep(_i))?
                                 <div  style={{borderBottom:'1px black solid'}}>
-                                    {ariTimeStr(time)}
+                                    {ariTimeStr(time,_i)}
                                 </div>:null
                             }
                             {
                                 (showAri(_i)&&!showDep(_i))?
                                     <div>
-                                        {ariTimeStr(time)}
+                                        {ariTimeStr(time,_i)}
                                     </div>:null
                             }
                             {
                                 (showDep(_i))?
                                     <div>
-                                        {depTimeStr(time)}
+                                        {depTimeStr(time,_i)}
                                     </div>:null
                             }
                         </div>
