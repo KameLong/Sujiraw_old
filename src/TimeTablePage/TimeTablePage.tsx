@@ -22,8 +22,7 @@ async function fetchGzipJson(url: string): Promise<any> {
     // ReadableStream を Response に変換
     const response2 = new Response(rstream);
     // Response を JSON に変換
-    const json = await response2.json();
-    return json;
+    return  await response2.json();
 }
 
 export interface TimeTablePageSetting{
@@ -47,30 +46,9 @@ export default function TimeTablePage() {
     const param = useParams<{ routeID:string,direct: string  }>();
     const routeID=parseInt(param.routeID??"0");
     const direct=parseInt(param.direct??"0");
-    function download(){
-        const a = document.createElement('a');
-        const blob = new Blob([JSON.stringify(trainTypes)], { "type" : "application/json" });
 
-        a.href = URL.createObjectURL(blob);
-        a.download = 'data.json';
-        a.click();
-
-
-        const blob2 = new Blob([JSON.stringify(stations)], { "type" : "application/json" });
-        a.href = URL.createObjectURL(blob2);
-        a.download = 'data2.json';
-        a.click();
-
-    }
-
-    const [time,setTime]=useState<number>(0);
-
-    useEffect(() => {
-        console.log("endLoad:"+(Date.now()-time));
-    }, [routes]);
 
    useEffect(() => {
-       setTime(Date.now());
        loadCompany().then((company)=>{
            setStations(company.stations);
            setTrainTypes(company.trainTypes);
@@ -125,10 +103,8 @@ export default function TimeTablePage() {
             if(stationViewLayout!==null){
                 stationViewLayout.style.top=-window.scrollY+"px";
             }
-
         })
-
-    }, []);
+   }, []);
     function getStationProps(){
         return routes[routeID].routeStations.map((item)=>{
             return {
@@ -145,37 +121,30 @@ export default function TimeTablePage() {
     if(routes[routeID]===undefined){
         return (
             <div style={{fontSize: `${setting.fontSize}px`, lineHeight: `${setting.fontSize * 1.2}px`}}>
-
                 <div style={{display: "flex", position: 'fixed', bottom: 0, width: '100%', backgroundColor: "#FFF"}}>
                     <Button sx={{m: 1}} variant={"contained"} style={{width: 0, flexGrow: 1, textAlign: 'center'}}
                             onClick={() => setOpenRouteSelect(true)}>
                         路線
                     </Button>
-
                     <Button sx={{m: 1}} variant={"contained"} style={{width: 0, flexGrow: 1, textAlign: 'center'}}
                             onClick={() => {
                                 navigate(`/TimeTable/${routeID}/0}`);
                             }}>
                         下り
                     </Button>
-
                     <Button sx={{m: 1}} variant={"contained"} style={{width: 0, flexGrow: 1, textAlign: 'center'}}
                             onClick={() => {
                                 navigate(`/TimeTable/${routeID}/1}`);
                             }}>
                         上り
                     </Button>
-
-
                     <Button sx={{m: 1}} variant={"contained"} style={{width: 0, flexGrow: 1, textAlign: 'center'}}
                             onClick={() => {
                                 navigate(`/Diagram/${routeID}`);
                             }}>
                         ダイヤ
                     </Button>
-
                 </div>
-
                 <Modal
                     id={"routeSelect"}
                     open={openRouteSelect}
@@ -201,7 +170,6 @@ export default function TimeTablePage() {
                     height: `${getTripNameViewHeight(setting)}px`,
                     background: "white",
                     zIndex: "10"
-
                 }}>
                     <div style={{textAlign: 'center'}}>列車番号</div>
                     <div style={{textAlign: 'center', borderBottom: '1px solid black'}}>列車種別</div>
@@ -246,22 +214,18 @@ export default function TimeTablePage() {
                         </div>
                     </div>
                 </div>
-
-
             </div>
             <div style={{display: "flex", position: 'fixed', bottom: 0, width: '100%', backgroundColor: "#FFF"}}>
                 <Button sx={{m: 1}} variant={"contained"} style={{width: 0, flexGrow: 1, textAlign: 'center'}}
                         onClick={() => setOpenRouteSelect(true)}>
                     路線
                 </Button>
-
                 <Button sx={{m: 1}} variant={"contained"} style={{width: 0, flexGrow: 1, textAlign: 'center'}}
                         onClick={() => {
                             navigate(`/TimeTable/${routeID}/0}`);
                         }}>
                     下り
                 </Button>
-
                 {/*<svg viewBox="0 0 64 64" width="48" height="48" stroke={"#52a8ff"} strokeWidth={2} style={{backgroundColor:'black'}}>*/}
                 {/*    <rect width="36" height="32" x="7" y="21" rx="4"></rect>*/}
                 {/*    <rect width="28" height="18" x="11" y="24" rx="4"></rect>*/}
@@ -277,7 +241,6 @@ export default function TimeTablePage() {
                         }}>
                     上り
                 </Button>
-
                 {/*<svg viewBox="0 0 64 64" width="48" height="48" stroke={"#52a8ff"} strokeWidth={2} style={{backgroundColor:'black'}}>*/}
                 {/*    <rect width="36" height="32" x="21" y="21" rx="4"></rect>*/}
                 {/*    <rect width="28" height="18" x="25" y="24" rx="4"></rect>*/}
@@ -293,12 +256,10 @@ export default function TimeTablePage() {
                         }}>
                     ダイヤ
                 </Button>
-
                 {/*<svg viewBox="0 0 64 64" width="48" height="48" stroke={"#52a8ff"} strokeWidth={2} style={{backgroundColor:'black'}}>*/}
                 {/*    <path d="M8 8 l10 12 l12 0 l26 36 M56 8 l-12 24 l-8 0 l-12 24 M8 30 l12 0l11 -22" ></path>*/}
                 {/*</svg>*/}
             </div>
-
             <Modal
                 id={"routeSelect"}
                 open={openRouteSelect}
@@ -310,5 +271,4 @@ export default function TimeTablePage() {
             </Modal>
         </div>
     );
-
 }

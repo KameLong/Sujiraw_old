@@ -327,25 +327,30 @@ function DiagramPage() {
 
     }, []);
     useEffect(() => {
-        render();
+       // render();
 
     }, [transform]);
     useEffect(() => {
-        render(true);
+        // render(true);
     }, [downLines,upLines]);
 
 
+    (function loop(){
+        window.requestAnimationFrame(loop);
+        render();
+    })();
+
     function render(force:boolean=false){
-        if(force&&Date.now()-befTime<30){
-            return;
-        }
-        befTime=Date.now();
-        const rand=Date.now();
+        // if(force&&Date.now()-befTime<30){
+        //     return;
+        // }
+        // befTime=Date.now();
+        // const rand=Date.now();
 
         const canvas=(document.getElementById("test") as  HTMLCanvasElement);
-        const ctx = canvas.getContext("2d");
-        if(ctx===null){
-            setTimeout(render,30);
+        const ctx = canvas?.getContext("2d");
+        if(ctx===null||ctx===undefined){
+//            setTimeout(render,30);
             return;
         };
         ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -503,6 +508,8 @@ function DiagramPage() {
     }}
     onTouchMove={(e)=>{
         if(e.touches.length===1) {
+            console.log("2");
+
             setTransform((prev)=>{
                 const res = {
                     x: prev.x - (e.touches[0].clientX - gesture.moving.x) / prev.xScale,
@@ -561,7 +568,6 @@ function DiagramPage() {
                 return res;
             });
         }
-        e.preventDefault();
     }}
     onTouchEnd={(e)=>{
         if(e.touches.length===1) {
