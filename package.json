@@ -6,24 +6,20 @@
     "@mui/icons-material": "^5.15.5",
     "@mui/material": "^5.15.3",
     "@mui/x-tree-view": "^6.17.0",
-    "@sqlite.org/sqlite-wasm": "^3.46.0-build2",
-    "@testing-library/jest-dom": "^5.17.0",
-    "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^13.5.0",
+    "@react-pdf/renderer": "^3.4.4",
     "@types/jest": "^27.5.2",
     "@types/node": "^17.0.45",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
-    "install": "^0.13.0",
     "pako": "^2.1.0",
-    "pixi.js": "7.3.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.21.1",
-    "react-scripts": "5.0.1",
     "react-use": "^17.4.3",
-    "typescript": "^4.9.5",
-    "web-vitals": "^2.1.4",
+    "typescript": "^4.9.5"
+  },
+  "nouse": {
+    "@sqlite.org/sqlite-wasm": "^3.46.0-build2",
     "workbox-background-sync": "^6.6.0",
     "workbox-broadcast-update": "^6.6.0",
     "workbox-cacheable-response": "^6.6.0",
@@ -62,6 +58,12 @@
     ]
   },
   "devDependencies": {
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "react-scripts": "5.0.1",
+    "web-vitals": "^2.1.4",
+    "install": "^0.13.0",
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0"
   }
 }

@@ -1,21 +1,19 @@
-import {GetStopTime, StopTime, TrainType, Trip} from "../DiaData/DiaData";
 import React from "react";
-import {TimeTablePageSetting} from "./TimeTablePage";
-import {StationProps} from "./StationView";
-import {timeIntStr} from "./Util";
-
-interface TripViewProps {
+import style from "../TimeTablePage.module.css";
+import {Text, View} from "@react-pdf/renderer";
+import {GetStopTime, StopTime, TrainType, Trip} from "../../DiaData/DiaData";
+import {StationProps} from "../StationView";
+import {TimeTablePageSetting} from "../TimeTablePage";
+import {timeIntStr} from "../Util";
+import {PDFTimeTableLayout} from "./TimeTablePDF";
+interface PDFTripViewProps {
     trip: Trip;
     type: TrainType;
     stations: StationProps[];
-    setting: TimeTablePageSetting;
+    setting: PDFTimeTableLayout;
     direction: number;
 }
-
-
-
-export function TripView({trip, type, setting, stations, direction}: TripViewProps) {
-
+function PDFTripView({trip,type,stations,setting,direction}:PDFTripViewProps) {
     function depTimeStr(time: StopTime, _i: number) {
         switch (time.stopType) {
             case 0:
@@ -97,44 +95,72 @@ export function TripView({trip, type, setting, stations, direction}: TripViewPro
             return trip.times.slice().reverse();
         }
     }
-
-
     return (
-        <div className={"DiaPro"} style={{
-            color: type.color,
-            borderRight: '1px solid gray',
-            width: (setting.fontSize * 2.2) + 'px',
-            flexShrink: 0,
-            textAlign: "center",
-            fontSize: `${setting.fontSize}px`,
-            lineHeight: `${setting.fontSize * 1.2}px`
-        }}>
+
+        <View
+            style={{
+                color: type.color,
+                width: setting.trainWidth + 'mm',
+                borderRight: '0.5px solid #000',
+                textAlign: 'center'
+            }}
+        >
+            <div style={{borderBottom: "1px solid #000"}}></div>
+            <div>
+                <Text style={{textAlign: 'center',width:"100%",height: (setting.lineHeight * 0.1) + 'px'}}>　</Text>
+            </div>
+            <div>
+                <Text style={{textAlign: 'center',width:"100%",height: (setting.lineHeight * 0.1) + 'px'}}>{type.shortName.length===0?"　":type.shortName}</Text>
+            </div>
+            <div style={{borderBottom: "1px solid #000"}}></div>
+
             {
                 getTimes().map((time, _i) => {
                     return (
                         <div key={time.rsID}>
                             {
                                 (showAri(_i) && showDep(_i)) ?
-                                    <div style={{borderBottom: '1px black solid'}}>
+                                    <Text style={{
+                                        fontFamily: "DiaPro",
+                                        width: '100%',
+                                        height: (setting.lineHeight * 0.1) + 'px',
+                                        textAlign: 'center',
+                                        borderBottom: '0.5px solid black'
+                                    }}>
                                         {ariTimeStr(time, _i)}
-                                    </div> : null
+                                    </Text> : null
                             }
                             {
                                 (showAri(_i) && !showDep(_i)) ?
-                                    <div>
+                                    <Text style={{
+                                        fontFamily: "DiaPro",
+                                        width: '100%',
+                                        height: (setting.lineHeight * 0.1) + 'px',
+                                        textAlign: 'center'
+                                    }}>
                                         {ariTimeStr(time, _i)}
-                                    </div> : null
+                                    </Text> : null
                             }
                             {
                                 (showDep(_i)) ?
-                                    <div>
+                                    <Text style={{
+                                        fontFamily: "DiaPro",
+                                        width: '100%',
+                                        height: (setting.lineHeight * 0.1) + 'px',
+                                        textAlign: 'center'
+                                    }}>
                                         {depTimeStr(time, _i)}
-                                    </div> : null
+                                    </Text> : null
                             }
                         </div>
                     )
                 })
             }
-        </div>
-    )
+            <div style={{borderBottom: "1px solid #000"}}></div>
+
+        </View>
+    );
 }
+
+
+export default PDFTripView;

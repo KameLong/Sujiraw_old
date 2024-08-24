@@ -1,5 +1,6 @@
 import {useEffect} from "react";
 import {TimeTablePageSetting} from "./TimeTablePage";
+import {stationStyle} from "./Util";
 
 export interface StationProps {
     rsID: number;
@@ -36,13 +37,7 @@ export function StationView({stations, setting, direction}: StationViewProps) {
         }
     }
 
-    function stationStyle(station: StationProps) {
-        if (direction === 0) {
-            return (station.style % 16);
-        } else {
-            return (Math.floor(station.style / 16) % 16);
-        }
-    }
+
 
     return (
         <div style={{
@@ -54,7 +49,7 @@ export function StationView({stations, setting, direction}: StationViewProps) {
         }}>
             {
                 stationList().map((station, _i) => {
-                    switch (stationStyle(station)) {
+                    switch (stationStyle(station,direction)) {
                         case 1:
                         case 2:
                             return (

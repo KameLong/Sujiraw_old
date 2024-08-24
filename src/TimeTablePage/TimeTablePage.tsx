@@ -1,7 +1,7 @@
 import React, {forwardRef, useEffect,  useState} from "react";
 import {
     Company,
-    EditRoute,
+    EditRoute, loadCompany, loadRoute,
     Route,
     RouteInfo,
     Station,
@@ -15,15 +15,7 @@ import {Button, Modal} from "@mui/material";
 import {RouteSelectView, RouteSelectViewProps} from "../Menu/RouteSelectView";
 import {useNavigate, useParams} from "react-router-dom";
 
-async function fetchGzipJson(url: string): Promise<any> {
-    const response = await fetch(url);
-    //@ts-ignore
-    const rstream = response.body.pipeThrough(new DecompressionStream('gzip'));
-    // ReadableStream を Response に変換
-    const response2 = new Response(rstream);
-    // Response を JSON に変換
-    return  await response2.json();
-}
+
 
 export interface TimeTablePageSetting{
     fontSize:number
@@ -79,12 +71,7 @@ export default function TimeTablePage() {
     }, [routeInfo,routeID]);
 
 
-    async function  loadRoute(id:number):Promise<Route>{
-        return await fetchGzipJson(`/route_${id}.json.gz`) as Route;
-    }
-    async function loadCompany():Promise<Company>{
-        return await fetchGzipJson(`/company.json.gz`);
-    }
+
     function getTrips() {
         if(direct===0){
             return routes[routeID].downTrips;
