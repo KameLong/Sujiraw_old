@@ -142,7 +142,7 @@ export interface Train {
     ariStationID: number;
     depTime: number;
     ariTime: number;
-    tripInfo: TripInfo[];
+    tripInfos: TripInfo[];
 
 }
 export interface TripInfo {

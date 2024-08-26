@@ -1,5 +1,5 @@
-import {GetStopTime, StopTime, TrainType, Trip} from "../DiaData/DiaData";
-import React from "react";
+import {GetStopTime, Station, StopTime, Train, TrainType, Trip} from "../DiaData/DiaData";
+import React, {useEffect, useRef} from "react";
 import {TimeTablePageSetting} from "./TimeTablePage";
 import {StationProps} from "./StationView";
 import {timeIntStr} from "./Util";
@@ -10,11 +10,25 @@ interface TripViewProps {
     stations: StationProps[];
     setting: TimeTablePageSetting;
     direction: number;
+    train:Train;
+    allStations:{[key:number]:Station};
 }
 
 
 
-export function TripView({trip, type, setting, stations, direction}: TripViewProps) {
+export function TripView({trip, type, setting, stations, direction,train,allStations}: TripViewProps) {
+    const ref = useRef<HTMLDivElement | null>(null);
+
+
+    useEffect(() => {
+        const element = ref.current?.querySelector(`#endStationName`) as HTMLDivElement | null;
+
+        if (element && element.parentElement) {
+            const scale = Math.min(1, element.parentElement.offsetWidth / element.offsetWidth);
+            element.style.transform = `scaleX(${scale})`;
+        }
+    }, [allStations, train,ref]);
+
 
     function depTimeStr(time: StopTime, _i: number) {
         switch (time.stopType) {
@@ -98,6 +112,32 @@ export function TripView({trip, type, setting, stations, direction}: TripViewPro
         }
     }
 
+    function hasOuterStation(){
+        const routeID=trip.routeID;
+        const tripInfo=train.tripInfos.find((value)=>value.routeID===routeID);
+        if(tripInfo===undefined){
+            return false;
+        }
+
+
+        return tripInfo.ariStationID!==train.ariStationID||tripInfo.ariTime!==train.ariTime;
+    }
+
+    function outerEndName(){
+        if(!hasOuterStation()) {
+            return "‥";
+        }
+
+        return allStations[train.ariStationID]?.name??"　";
+    }
+    function outerEndTime(){
+        if(!hasOuterStation()) {
+            return "‥";
+        }
+        return timeIntStr(train.ariTime);
+    }
+
+
 
     return (
         <div className={"DiaPro"} style={{
@@ -107,27 +147,32 @@ export function TripView({trip, type, setting, stations, direction}: TripViewPro
             flexShrink: 0,
             textAlign: "center",
             fontSize: `${setting.fontSize}px`,
-            lineHeight: `${setting.fontSize * 1.2}px`
-        }}>
+            lineHeight: `${setting.fontSize * setting.lineHeight}px`
+
+        }}
+         ref={ref}>
             {
                 getTimes().map((time, _i) => {
                     return (
                         <div key={time.rsID}>
                             {
                                 (showAri(_i) && showDep(_i)) ?
-                                    <div style={{borderBottom: '1px black solid'}}>
+                                    <div style={{borderBottom: '1px black solid',height: `${setting.fontSize * setting.lineHeight}px`,
+                                        lineHeight: `${setting.fontSize * setting.lineHeight }px`}}>
                                         {ariTimeStr(time, _i)}
                                     </div> : null
                             }
                             {
                                 (showAri(_i) && !showDep(_i)) ?
-                                    <div>
+                                    <div style={{height: `${setting.fontSize * setting.lineHeight }px`,
+                                        lineHeight: `${setting.fontSize * setting.lineHeight }px`}}>
                                         {ariTimeStr(time, _i)}
                                     </div> : null
                             }
                             {
                                 (showDep(_i)) ?
-                                    <div>
+                                    <div style={{height: `${setting.fontSize * setting.lineHeight }px`,
+                                        lineHeight: `${setting.fontSize * setting.lineHeight }px`}}>
                                         {depTimeStr(time, _i)}
                                     </div> : null
                             }
@@ -135,6 +180,25 @@ export function TripView({trip, type, setting, stations, direction}: TripViewPro
                     )
                 })
             }
+            <div style={{borderTop: '2px solid black'}}>
+            </div>
+            {hasOuterStation()?(
+                <div className={"nowrap"}
+                >
+                    <span id="endStationName" className="text">{outerEndName()}</span>
+                </div>
+            ): (
+                <div className={"DiaPro"}
+                >
+                    {outerEndName()}
+                </div>
+            )
+            }
+            <div className={"DiaPro"}
+            >
+                {outerEndTime()}
+            </div>
+
         </div>
     )
 }

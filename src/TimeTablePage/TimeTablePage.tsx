@@ -14,35 +14,30 @@ import {TripView} from "./TripVIew";
 import {Button, Modal} from "@mui/material";
 import {RouteSelectView, RouteSelectViewProps} from "../Menu/RouteSelectView";
 import {useNavigate, useParams} from "react-router-dom";
-
-
-
+import { StationHeaderView } from "./StationHeaderView";
 export interface TimeTablePageSetting{
-    fontSize:number
+    fontSize:number,
+    lineHeight:number,
 }
-
-
-
 export default function TimeTablePage() {
     const [stations, setStations] = useState<{[key:number]:Station}>({});
     const [trainTypes, setTrainTypes] = useState<{[key:number]:TrainType}>({});
     const [trains, setTrains] = useState<{[key:number]:Train}>({});
     const [routeInfo, setRouteInfo] = useState<{[key:number]:RouteInfo}>({});
     const [routes, setRoutes] = useState<{[key:number]:Route}>({});
-
     const navigate=useNavigate();
     const [setting,setSetting]=useState<TimeTablePageSetting>({
-        fontSize:13
+        fontSize:13,
+        lineHeight:1.1
     });
     const [openRouteSelect,setOpenRouteSelect]=useState<boolean>(false);
     const param = useParams<{ routeID:string,direct: string  }>();
     const routeID=parseInt(param.routeID??"0");
     const direct=parseInt(param.direct??"0");
-
-
    useEffect(() => {
        loadCompany().then((company)=>{
            setStations(company.stations);
+           // console.log(stations);
            setTrainTypes(company.trainTypes);
            setTrains(company.trains);
            setRouteInfo(company.routes);
@@ -107,7 +102,7 @@ export default function TimeTablePage() {
 
     if(routes[routeID]===undefined){
         return (
-            <div style={{fontSize: `${setting.fontSize}px`, lineHeight: `${setting.fontSize * 1.2}px`}}>
+            <div style={{fontSize: `${setting.fontSize}px`, lineHeight: `${setting.fontSize * setting.lineHeight}px`}}>
                 <div style={{display: "flex", position: 'fixed', bottom: 0, width: '100%', backgroundColor: "#FFF"}}>
                     <Button sx={{m: 1}} variant={"contained"} style={{width: 0, flexGrow: 1, textAlign: 'center'}}
                             onClick={() => setOpenRouteSelect(true)}>
@@ -147,7 +142,7 @@ export default function TimeTablePage() {
         )
     }
     return (
-        <div style={{fontSize: `${setting.fontSize}px`, lineHeight: `${setting.fontSize * 1.2}px`}}>
+        <div style={{fontSize: `${setting.fontSize}px`, lineHeight: `${setting.fontSize * setting.lineHeight}px`}}>
             <div style={{display: "flex", width: '100%', height: '100%', paddingBottom: "70px"}}>
                 <div style={{
                     width: `${getStationViewWidth(setting)}px`,
@@ -158,8 +153,8 @@ export default function TimeTablePage() {
                     background: "white",
                     zIndex: "10"
                 }}>
-                    <div style={{textAlign: 'center'}}>列車番号</div>
-                    <div style={{textAlign: 'center', borderBottom: '1px solid black'}}>列車種別</div>
+                    <StationHeaderView  setting={setting}/>
+
                 </div>
                 <div style={{
                     width: `${getStationViewWidth(setting)}px`,
@@ -182,7 +177,9 @@ export default function TimeTablePage() {
                         {
                             getTrips().map((trip) =>
                                 <TripNameView key={trip.tripID} trip={trip} type={trainTypes[trip.trainTypeID]}
-                                              setting={setting}/>
+                                              setting={setting}
+                                train={trains[trip.trainID]}
+                                stations={stations}/>
                             )}
                     </div>
                     <div>
@@ -195,7 +192,8 @@ export default function TimeTablePage() {
                             {
                                 getTrips().map((trip) =>
                                     <TripView key={trip.tripID} trip={trip} type={trainTypes[trip.trainTypeID]}
-                                              setting={setting} stations={getStationProps()}
+                                              setting={setting} stations={getStationProps()} allStations={stations}
+                                              train={trains[trip.trainID]}
                                               direction={direct}/>
                                 )}
                         </div>

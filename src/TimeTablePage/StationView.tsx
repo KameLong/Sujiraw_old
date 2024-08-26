@@ -1,4 +1,4 @@
-import {useEffect} from "react";
+import React, {useEffect} from "react";
 import {TimeTablePageSetting} from "./TimeTablePage";
 import {stationStyle} from "./Util";
 
@@ -40,25 +40,26 @@ export function StationView({stations, setting, direction}: StationViewProps) {
 
 
     return (
+        <div>
         <div style={{
             padding: '0px 5px',
             flexShrink: 0,
             textAlign: "center",
             fontSize: `${setting.fontSize}px`,
-            lineHeight: `${setting.fontSize * 1.2}px`
+            lineHeight: `${setting.fontSize * setting.lineHeight}px`
         }}>
             {
                 stationList().map((station, _i) => {
-                    switch (stationStyle(station,direction)) {
+                    switch (stationStyle(station, direction)) {
                         case 1:
                         case 2:
                             return (
                                 <div style={{
-                                    whiteSpace: 'nowrap',
-                                    overflow: "hidden",
-                                    height: `${setting.fontSize * 1.2}px`,
-                                    lineHeight: `${setting.fontSize * 1.2}px`
-                                }} key={station.rsID}>
+                                    height: `${setting.fontSize * setting.lineHeight}px`,
+                                    lineHeight: `${setting.fontSize * setting.lineHeight}px`
+                                }}
+                                     className={"nowrap"}
+                                     key={station.rsID}>
                                         <span id={`text-${station.rsID}`} className="text">
                                        {station.name}
                                         </span>
@@ -69,8 +70,8 @@ export function StationView({stations, setting, direction}: StationViewProps) {
                                 <div style={{
                                     whiteSpace: 'nowrap',
                                     overflow: "hidden",
-                                    height: `${setting.fontSize * 2.4 + 0.5}px`,
-                                    lineHeight: `${setting.fontSize * 2.4 + 0.5}px`
+                                    height: `${setting.fontSize * setting.lineHeight * 2 }px`,
+                                    lineHeight: `${setting.fontSize * setting.lineHeight * 2}px`
                                 }} key={station.rsID}>
                                     <span id={`text-${station.rsID}`} className="text">{station.name}</span>
                                 </div>
@@ -78,6 +79,16 @@ export function StationView({stations, setting, direction}: StationViewProps) {
                     }
                 })
             }
+        </div>
+            <div style={{borderTop: '2px solid black'}}>
+            </div>
+
+            <div className={"nowrap"}
+                 style={{lineHeight: `${setting.fontSize * setting.lineHeight * 2}px`, textAlign: "center",
+                 }}
+            >
+                終着
+            </div>
         </div>
     )
 }
