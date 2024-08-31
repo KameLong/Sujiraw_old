@@ -17,7 +17,6 @@ export function getTripNameViewHeight(setting: TimeTablePageSetting) {
 
 export function TripNameView({trip,train, type, setting,stations}: TripNameViewProps) {
     const ref = useRef<HTMLDivElement | null>(null);
-    console.log(2);
 
     function hasOuterStation(){
         const routeID=trip.routeID;
@@ -47,6 +46,9 @@ export function TripNameView({trip,train, type, setting,stations}: TripNameViewP
             element.style.transform = `scaleX(${scale})`;
         }
     }, [stations, train,ref]);
+    if(type===undefined){
+        return <div>error</div>
+    }
 
     return (
         <div style={{

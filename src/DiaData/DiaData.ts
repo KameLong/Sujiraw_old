@@ -1,11 +1,12 @@
 export async function fetchGzipJson(url: string): Promise<any> {
         const response = await fetch(url);
-        //@ts-ignore
-        const rstream = response.body.pipeThrough(new DecompressionStream('gzip'));
-        // ReadableStream を Response に変換
-        const response2 = new Response(rstream);
-        // Response を JSON に変換
-        return  await response2.json();
+        // //@ts-ignore
+        // const rstream = response.body.pipeThrough(new DecompressionStream('gzip'));
+        // console.log(rstream);
+        // // ReadableStream を Response に変換
+        // const response2 = new Response(rstream);
+        // // Response を JSON に変換
+        return  await response.json();
 }
 export async function  loadRoute(id:number):Promise<Route>{
     try{

@@ -3,17 +3,7 @@
 import React, {useEffect, useRef, useState} from 'react';
 import { DiagramStation, DiagramTrip} from "./DiagramData";
 import {useParams} from "react-router-dom";
-import {Company, Route, RouteInfo, Station, StopTime, Train, TrainType} from "../DiaData/DiaData";
-async function fetchGzipJson(url: string): Promise<any> {
-    const response = await fetch(url);
-    //@ts-ignore
-    const rstream = response.body.pipeThrough(new DecompressionStream('gzip'));
-    // ReadableStream を Response に変換
-    const response2 = new Response(rstream);
-    // Response を JSON に変換
-    return  await response2.json();
-}
-
+import {Company, fetchGzipJson, Route, RouteInfo, Station, StopTime, Train, TrainType} from "../DiaData/DiaData";
 
 let befTime=Date.now();
 const fontSize=10;

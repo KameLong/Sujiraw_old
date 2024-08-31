@@ -136,7 +136,6 @@ export function TripView({trip, type, setting, stations, direction,train,allStat
         }
         return timeIntStr(train.ariTime);
     }
-    console.log("1");
 
 
 
@@ -151,29 +150,36 @@ export function TripView({trip, type, setting, stations, direction,train,allStat
             lineHeight: `${setting.fontSize * setting.lineHeight}px`
 
         }}
-         ref={ref}>
+             ref={ref}>
             {
                 getTimes().map((time, _i) => {
                     return (
                         <div key={time.rsID}>
                             {
                                 (showAri(_i) && showDep(_i)) ?
-                                    <div style={{borderBottom: '1px black solid',height: `${setting.fontSize * setting.lineHeight}px`,
-                                        lineHeight: `${setting.fontSize * setting.lineHeight }px`}}>
+                                    <div style={{
+                                        borderBottom: '1px black solid',
+                                        height: `${setting.fontSize * setting.lineHeight}px`,
+                                        lineHeight: `${setting.fontSize * setting.lineHeight}px`
+                                    }}>
                                         {ariTimeStr(time, _i)}
                                     </div> : null
                             }
                             {
                                 (showAri(_i) && !showDep(_i)) ?
-                                    <div style={{height: `${setting.fontSize * setting.lineHeight }px`,
-                                        lineHeight: `${setting.fontSize * setting.lineHeight }px`}}>
+                                    <div style={{
+                                        height: `${setting.fontSize * setting.lineHeight}px`,
+                                        lineHeight: `${setting.fontSize * setting.lineHeight}px`
+                                    }}>
                                         {ariTimeStr(time, _i)}
                                     </div> : null
                             }
                             {
                                 (showDep(_i)) ?
-                                    <div style={{height: `${setting.fontSize * setting.lineHeight }px`,
-                                        lineHeight: `${setting.fontSize * setting.lineHeight }px`}}>
+                                    <div style={{
+                                        height: `${setting.fontSize * setting.lineHeight}px`,
+                                        lineHeight: `${setting.fontSize * setting.lineHeight}px`
+                                    }}>
                                         {depTimeStr(time, _i)}
                                     </div> : null
                             }
@@ -184,22 +190,24 @@ export function TripView({trip, type, setting, stations, direction,train,allStat
             <div style={{borderTop: '2px solid black'}}>
             </div>
             <div>
-            {hasOuterStation()?(
-                <div className={"nowrap"}
-                >
-                    <span id="endStationName" className="text">{outerEndName()}</span>
-                </div>
-            ): (
+                {hasOuterStation() ? (
+                    <div className={"nowrap"}
+                    >
+                        <span id="endStationName" className="text">{outerEndName()}</span>
+                    </div>
+                ) : (
+                    <div className={"DiaPro"}
+                    >
+                        {outerEndName()}
+                    </div>
+                )
+                }
                 <div className={"DiaPro"}
                 >
-                    {outerEndName()}
+                    {outerEndTime()}
                 </div>
-            )
-            }
-            <div className={"DiaPro"}
-            >
-                {outerEndTime()}
             </div>
+            <div style={{borderTop: '2px solid black'}}>
             </div>
 
         </div>

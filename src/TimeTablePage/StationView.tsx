@@ -41,54 +41,58 @@ export function StationView({stations, setting, direction}: StationViewProps) {
 
     return (
         <div>
-        <div style={{
-            padding: '0px 5px',
-            flexShrink: 0,
-            textAlign: "center",
-            fontSize: `${setting.fontSize}px`,
-            lineHeight: `${setting.fontSize * setting.lineHeight}px`
-        }}>
-            {
-                stationList().map((station, _i) => {
-                    switch (stationStyle(station, direction)) {
-                        case 1:
-                        case 2:
-                            return (
-                                <div style={{
-                                    height: `${setting.fontSize * setting.lineHeight}px`,
-                                    lineHeight: `${setting.fontSize * setting.lineHeight}px`
-                                }}
-                                     className={"nowrap"}
-                                     key={station.rsID}>
+            <div style={{
+                padding: '0px 5px',
+                flexShrink: 0,
+                textAlign: "center",
+                fontSize: `${setting.fontSize}px`,
+                lineHeight: `${setting.fontSize * setting.lineHeight}px`
+            }}>
+                {
+                    stationList().map((station, _i) => {
+                        switch (stationStyle(station, direction)) {
+                            case 1:
+                            case 2:
+                                return (
+                                    <div style={{
+                                        height: `${setting.fontSize * setting.lineHeight}px`,
+                                        lineHeight: `${setting.fontSize * setting.lineHeight}px`
+                                    }}
+                                         className={"nowrap"}
+                                         key={station.rsID}>
                                         <span id={`text-${station.rsID}`} className="text">
                                        {station.name}
                                         </span>
-                                </div>
-                            );
-                        case 3:
-                            return (
-                                <div style={{
-                                    whiteSpace: 'nowrap',
-                                    overflow: "hidden",
-                                    height: `${setting.fontSize * setting.lineHeight * 2 }px`,
-                                    lineHeight: `${setting.fontSize * setting.lineHeight * 2}px`
-                                }} key={station.rsID}>
-                                    <span id={`text-${station.rsID}`} className="text">{station.name}</span>
-                                </div>
-                            );
-                    }
-                })
-            }
-        </div>
+                                    </div>
+                                );
+                            case 3:
+                                return (
+                                    <div style={{
+                                        whiteSpace: 'nowrap',
+                                        overflow: "hidden",
+                                        height: `${setting.fontSize * setting.lineHeight * 2}px`,
+                                        lineHeight: `${setting.fontSize * setting.lineHeight * 2}px`
+                                    }} key={station.rsID}>
+                                        <span id={`text-${station.rsID}`} className="text">{station.name}</span>
+                                    </div>
+                                );
+                        }
+                    })
+                }
+            </div>
             <div style={{borderTop: '2px solid black'}}>
             </div>
 
             <div className={"nowrap"}
-                 style={{lineHeight: `${setting.fontSize * setting.lineHeight * 2}px`, textAlign: "center",
+                 style={{
+                     lineHeight: `${setting.fontSize * setting.lineHeight * 2}px`, textAlign: "center",
                  }}
             >
                 終着
             </div>
+            <div style={{borderTop: '2px solid black'}}>
+            </div>
+
         </div>
     )
 }

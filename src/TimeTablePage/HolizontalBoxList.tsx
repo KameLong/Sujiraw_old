@@ -11,9 +11,13 @@ interface BoxListProps {
 
 export function HolizontalBoxList({children,itemCount,itemSize,onScroll,getSetScrollX}: BoxListProps){
     const ref = useRef<HTMLDivElement | null>(null);
-    const [scrollX,setScrollX]=useState(0);
+    const [scrollX,setScrollX]=useState(-1);
     useEffect(() => {
         if (ref.current) {
+            ref.current.onresize = (e) => {
+                console.log(e);
+                setScrollX(ref.current?.scrollLeft??0);
+            }
             ref.current.onscroll = (e) => {
                 if(onScroll){
                     onScroll(ref.current?.scrollLeft??0,ref.current?.scrollTop??0);
@@ -23,7 +27,9 @@ export function HolizontalBoxList({children,itemCount,itemSize,onScroll,getSetSc
                 }
             }
         }
+        setScrollX(0);
     }, []);
+
     const setScroll=(scrollX:number)=>{
         setScrollX(scrollX);
         if (ref.current) {
