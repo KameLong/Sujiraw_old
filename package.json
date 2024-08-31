@@ -11,12 +11,15 @@
     "@types/node": "^17.0.45",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
+    "@types/react-window": "^1.8.8",
     "pako": "^2.1.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.21.1",
     "react-use": "^17.4.3",
-    "typescript": "^4.9.5"
+    "react-window": "^1.8.10",
+    "typescript": "^4.9.5",
+    "use-resize-observer": "^9.1.0"
   },
   "nouse": {
     "@sqlite.org/sqlite-wasm": "^3.46.0-build2",
@@ -58,12 +61,12 @@
     ]
   },
   "devDependencies": {
-    "ts-node": "^10.9.2",
-    "react-scripts": "5.0.1",
-    "web-vitals": "^2.1.4",
-    "install": "^0.13.0",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^13.5.0"
+    "@testing-library/user-event": "^13.5.0",
+    "install": "^0.13.0",
+    "react-scripts": "5.0.1",
+    "ts-node": "^10.9.2",
+    "web-vitals": "^2.1.4"
   }
 }

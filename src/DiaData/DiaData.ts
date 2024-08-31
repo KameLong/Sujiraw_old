@@ -1,17 +1,31 @@
 export async function fetchGzipJson(url: string): Promise<any> {
-    const response = await fetch(url);
-    //@ts-ignore
-    const rstream = response.body.pipeThrough(new DecompressionStream('gzip'));
-    // ReadableStream を Response に変換
-    const response2 = new Response(rstream);
-    // Response を JSON に変換
-    return  await response2.json();
+        const response = await fetch(url);
+        //@ts-ignore
+        const rstream = response.body.pipeThrough(new DecompressionStream('gzip'));
+        // ReadableStream を Response に変換
+        const response2 = new Response(rstream);
+        // Response を JSON に変換
+        return  await response2.json();
 }
 export async function  loadRoute(id:number):Promise<Route>{
+    try{
     return await fetchGzipJson(`/route_${id}.json.gz`) as Route;
+}catch(ex){
+        console.error(ex);
+        return new Promise((resolve, reject) => {
+            resolve({routeID: id, name: "読み込みエラー", routeStations: [], downTrips: [], upTrips: []});
+        });
+    }
 }
 export async function loadCompany():Promise<Company>{
+    try{
     return await fetchGzipJson(`/company.json.gz`);
+    }catch(ex){
+        console.error(ex);
+        return new Promise((resolve, reject) => {
+            resolve({routes: {}, stations: {}, trains: {}, trainTypes: {}});
+        });
+    }
 }
 
 

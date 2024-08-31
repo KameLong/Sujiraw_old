@@ -44,7 +44,17 @@ code {
 }
 *{
   box-sizing: border-box;
+  /*overflow: hidden;*/
 }
+* {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+*::-webkit-scrollbar {
+  display: none;
+}
+
 
 /*モーダルスライドイン*/
 .modal-enter {

@@ -17,15 +17,13 @@ export function getTripNameViewHeight(setting: TimeTablePageSetting) {
 
 export function TripNameView({trip,train, type, setting,stations}: TripNameViewProps) {
     const ref = useRef<HTMLDivElement | null>(null);
+    console.log(2);
 
     function hasOuterStation(){
         const routeID=trip.routeID;
         const tripInfo=train.tripInfos.find((value)=>value.routeID===routeID);
         if(tripInfo===undefined){
             return false;
-        }
-        if(tripInfo.depStationID===2700504||train.depStationID===2700504){
-            console.log(tripInfo.depStationID,train.depStationID);
         }
         return tripInfo.depStationID!==train.depStationID||tripInfo.depTime!==train.depTime;
     }
@@ -56,6 +54,7 @@ export function TripNameView({trip,train, type, setting,stations}: TripNameViewP
             borderRight: '1px solid gray',
             width: (setting.fontSize * 2.2) + 'px',
             flexShrink: 0,
+            height: '100%',
             textAlign: "center",
             fontSize: `${setting.fontSize}px`,
             lineHeight: `${setting.fontSize * setting.lineHeight}px`,

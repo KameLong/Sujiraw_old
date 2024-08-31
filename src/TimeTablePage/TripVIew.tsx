@@ -136,6 +136,7 @@ export function TripView({trip, type, setting, stations, direction,train,allStat
         }
         return timeIntStr(train.ariTime);
     }
+    console.log("1");
 
 
 
@@ -144,7 +145,7 @@ export function TripView({trip, type, setting, stations, direction,train,allStat
             color: type.color,
             borderRight: '1px solid gray',
             width: (setting.fontSize * 2.2) + 'px',
-            flexShrink: 0,
+            // flexShrink: 0,
             textAlign: "center",
             fontSize: `${setting.fontSize}px`,
             lineHeight: `${setting.fontSize * setting.lineHeight}px`
@@ -182,6 +183,7 @@ export function TripView({trip, type, setting, stations, direction,train,allStat
             }
             <div style={{borderTop: '2px solid black'}}>
             </div>
+            <div>
             {hasOuterStation()?(
                 <div className={"nowrap"}
                 >
@@ -197,6 +199,7 @@ export function TripView({trip, type, setting, stations, direction,train,allStat
             <div className={"DiaPro"}
             >
                 {outerEndTime()}
+            </div>
             </div>
 
         </div>
