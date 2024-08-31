@@ -6,10 +6,33 @@ import {useParams} from "react-router-dom";
 import {Company, fetchGzipJson, Route, RouteInfo, Station, StopTime, Train, TrainType} from "../DiaData/DiaData";
 
 let befTime=Date.now();
+export const usePreventDefault = <T extends HTMLElement>(
+    eventName: string,
+    enable = true
+) => {
+    const ref = useRef<T>(null);
+    useEffect(() => {
+        const current = ref.current;
+        if (!current) {
+            return;
+        }
+        const handler = (event: Event) => {
+            if (enable) {
+                event.preventDefault();
+            }
+        };
+        current.addEventListener(eventName, handler);
+        return () => {
+            current.removeEventListener(eventName, handler);
+        };
+    }, [enable, eventName]);
+
+    return ref;
+};
+
+
+
 const fontSize=10;
-
-
-//canvas.drawLine(options.scaleX *60 * (15 + 60 * i), 0, options.scaleX *60 * (15 + 60 * i),axisHeight * options.scaleY, paint);
 function DrawLine(ctx:CanvasRenderingContext2D,x1:number,y1:number,x2:number,y2:number,width:number,color:string,transform:DiagramTransform,SCALE :number){
     ctx.beginPath();
     ctx.strokeStyle = color;
@@ -331,16 +354,9 @@ function DiagramPage() {
     })();
 
     function render(force:boolean=false){
-        // if(force&&Date.now()-befTime<30){
-        //     return;
-        // }
-        // befTime=Date.now();
-        // const rand=Date.now();
-
         const canvas=(document.getElementById("test") as  HTMLCanvasElement);
         const ctx = canvas?.getContext("2d");
         if(ctx===null||ctx===undefined){
-//            setTimeout(render,30);
             return;
         };
         ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -451,143 +467,183 @@ function DiagramPage() {
             ctx.textBaseline = "bottom";
             ctx.fillText(station.station.name,5,(station.stationTime-transform.y)*transform.yScale*SCALE);
         }
-//        console.log(Date.now()-rand);
-
-
-
     }
 
-    const canvas = useRef<HTMLCanvasElement>(null);
-    // useEffect(() => {
-    //     canvas.current?.addEventListener("touchstart", onTouchStart, { passive: false });
-    //     canvas.current?.addEventListener("touchmove", onTouchMove, { passive: false });
-    //     canvas.current?.addEventListener("touchend", onTouchEnd, { passive: false });
-    //     return (() => {
-    //         canvas.current?.removeEventListener("touchstart", onTouchStart);
-    //         canvas.current?.removeEventListener("touchmove", onTouchMove);
-    //         canvas.current?.removeEventListener("touchend", onTouchEnd);
-    //     });
-    // },[canvas]);
+    const ref=useRef<HTMLDivElement | null>(null);
+    useEffect(() => {
+        if(!ref.current){
+            return;
+        }
+        ref.current.addEventListener('touchstart',(e)=>{
+            if(e.touches.length>=2){
+                console.log(e)
+                e.preventDefault();
+            }
+        });
+        ref.current.addEventListener('touchmove',(e)=>{
+            if(e.touches.length>=2){
+                console.log(e)
+                e.preventDefault();
+            }
+        });
+        ref.current.addEventListener('touchend',(e)=>{
+            if(e.touches.length>=2){
+                console.log(e)
+                e.preventDefault();
+            }
+        });
+
+       ref.current.onscroll = (e) => {
+            const target=e.target as HTMLDivElement;
+            setTransform((prev)=>{
+                const res={
+                    x:(target.scrollLeft)/prev.xScale,
+                    y:(target.scrollTop)/prev.yScale,
+                    xScale:prev.xScale,
+                    yScale:prev.yScale
+                }
+                res.y=Ypos(res,diaRect);
+                return res
+            });
+            // console.log(target.scrollLeft,target.scrollTop);
+        }
+
+    }, []);
+
+
 
 
 
 
     return (
-        <canvas tabIndex={1} id="test"  style={{width:'100%',height:'100%',overflowY:'hidden'}}
-    onTouchStart={(e)=>{
-        if(e.touches.length===1) {
-            setGesture({
-                isDrag:true,
-                start1:{x:e.touches[0].clientX,y:e.touches[0].clientY},
-                moving:{x:e.touches[0].clientX,y:e.touches[0].clientY}
-            });
-        }
-        if(e.touches.length===2) {
-            setGesture2({
-                isXDrag:Math.abs(e.touches[0].clientX-e.touches[1].clientX)>100,
-                isYDrag:Math.abs(e.touches[0].clientY-e.touches[1].clientY)>100,
-                transform:transform,
-                start1:{x:e.touches[0].clientX,y:e.touches[0].clientY},
-                moving1:{x:e.touches[0].clientX,y:e.touches[0].clientY},
-                start2:{x:e.touches[1].clientX,y:e.touches[1].clientY},
-                moving2:{x:e.touches[1].clientX,y:e.touches[1].clientY}
-            });
-        }
-        e.preventDefault();
+        <div ref={ref}
+             style={{position: 'relative', height: '100%', overflowX: "auto", overflowY: "auto"}}
+        >
+            <canvas
+                id="test" style={{position: 'fixed',pointerEvents: 'none', width: '100%', height: '100%', overflowY: 'hidden'}}
+                // onTouchStart={(e)=>{
+                //     if(e.touches.length===1) {
+                //         setGesture({
+                //             isDrag:true,
+                //             start1:{x:e.touches[0].clientX,y:e.touches[0].clientY},
+                //             moving:{x:e.touches[0].clientX,y:e.touches[0].clientY}
+                //         });
+                //     }
+                //     if(e.touches.length===2) {
+                //         setGesture2({
+                //             isXDrag:Math.abs(e.touches[0].clientX-e.touches[1].clientX)>100,
+                //             isYDrag:Math.abs(e.touches[0].clientY-e.touches[1].clientY)>100,
+                //             transform:transform,
+                //             start1:{x:e.touches[0].clientX,y:e.touches[0].clientY},
+                //             moving1:{x:e.touches[0].clientX,y:e.touches[0].clientY},
+                //             start2:{x:e.touches[1].clientX,y:e.touches[1].clientY},
+                //             moving2:{x:e.touches[1].clientX,y:e.touches[1].clientY}
+                //         });
+                //     }
+                //     e.preventDefault();
+                //
+                // }}
+                // onTouchMove={(e)=>{
+                //     if(e.touches.length===1) {
+                //         console.log("2");
+                //
+                //         setTransform((prev)=>{
+                //             const res = {
+                //                 x: prev.x - (e.touches[0].clientX - gesture.moving.x) / prev.xScale,
+                //                 y: prev.y - (e.touches[0].clientY - gesture.moving.y) / prev.yScale,
+                //                 xScale: prev.xScale,
+                //                 yScale: prev.yScale
+                //             }
+                //             res.y=Ypos(res,diaRect);
+                //             return res
+                //         });
+                //         setGesture(prev=>{return{
+                //             isDrag: true,
+                //             start1: prev.start1,
+                //             moving: {x: e.touches[0].clientX, y: e.touches[0].clientY}
+                //         }});
+                //     }
+                //     if(e.touches.length===2) {
+                //         const nowPos1={x:e.touches[0].clientX,y:e.touches[0].clientY};
+                //         const nowPos2={x:e.touches[1].clientX,y:e.touches[1].clientY};
+                //         const prevTransform=gesture2.transform;
+                //
+                //         let scaleX=Math.abs(prevTransform.xScale*(nowPos1.x-nowPos2.x)/(gesture2.start1.x-gesture2.start2.x));
+                //         let scaleY=Math.abs(prevTransform.yScale*(nowPos1.y-nowPos2.y)/(gesture2.start1.y-gesture2.start2.y));
+                //         if(Math.abs(nowPos2.y-nowPos1.y)<100) {
+                //             scaleY = transform.yScale;
+                //         }
+                //         if(Math.abs(nowPos2.x-nowPos1.x)<100) {
+                //             scaleX = transform.xScale;
+                //         }
+                //         let x1=prevTransform.x+gesture2.start1.x/prevTransform.xScale-nowPos1.x/scaleX;
+                //         let y1=prevTransform.y+gesture2.start1.y/prevTransform.yScale-nowPos1.y/scaleY;
+                //         let x2=prevTransform.x+gesture2.start2.x/prevTransform.xScale-nowPos2.x/scaleX;
+                //         let y2=prevTransform.y+gesture2.start2.y/prevTransform.yScale-nowPos2.y/scaleY;
+                //         let x=(x1+x2)/2;
+                //         let y=(y1+y2)/2;
+                //
+                //
+                //         setGesture2(prev=>{return{
+                //             isXDrag:Math.abs(e.touches[0].clientX-e.touches[1].clientX)>100,
+                //             isYDrag:Math.abs(e.touches[0].clientY-e.touches[1].clientY)>100,
+                //             transform:prev.transform,
+                //             start1: prev.start1,
+                //             start2: prev.start2,
+                //             moving1: nowPos1,
+                //             moving2: nowPos2
+                //         }});
+                //         setTransform((prev)=> {
+                //             const res = {
+                //                 x: x,
+                //                 y: y,
+                //                 xScale: scaleX,
+                //                 yScale: scaleY
+                //             }
+                //             res.y=Ypos(res,diaRect);
+                //
+                //             return res;
+                //         });
+                //     }
+                // }}
+                // onTouchEnd={(e)=>{
+                //     if(e.touches.length===1) {
+                //         setGesture({
+                //             isDrag:true,
+                //             start1:{x:e.touches[0].clientX,y:e.touches[0].clientY},
+                //             moving:{x:e.touches[0].clientX,y:e.touches[0].clientY}
+                //         });
+                //     }
+                //     if(e.touches.length===2) {
+                //         setGesture2({
+                //             isXDrag:Math.abs(e.touches[0].clientX-e.touches[1].clientX)>100,
+                //             isYDrag:Math.abs(e.touches[0].clientY-e.touches[1].clientY)>100,
+                //             transform:transform,
+                //             start1:{x:e.touches[0].clientX,y:e.touches[0].clientY},
+                //             moving1:{x:e.touches[0].clientX,y:e.touches[0].clientY},
+                //             start2:{x:e.touches[1].clientX,y:e.touches[1].clientY},
+                //             moving2:{x:e.touches[1].clientX,y:e.touches[1].clientY}
+                //         });
+                //     }
+                // }}
+            >
+            </canvas>
+            <div style={{
+                width: 24 * 3600 * transform.xScale,
+                height: transform.yScale * diaRect.yEnd
+            }}>
 
-    }}
-    onTouchMove={(e)=>{
-        if(e.touches.length===1) {
-            console.log("2");
+            </div>
 
-            setTransform((prev)=>{
-                const res = {
-                    x: prev.x - (e.touches[0].clientX - gesture.moving.x) / prev.xScale,
-                    y: prev.y - (e.touches[0].clientY - gesture.moving.y) / prev.yScale,
-                    xScale: prev.xScale,
-                    yScale: prev.yScale
-                }
-                res.y=Ypos(res,diaRect);
-                return res
-            });
-            setGesture(prev=>{return{
-                isDrag: true,
-                start1: prev.start1,
-                moving: {x: e.touches[0].clientX, y: e.touches[0].clientY}
-            }});
-        }
-        if(e.touches.length===2) {
-            const nowPos1={x:e.touches[0].clientX,y:e.touches[0].clientY};
-            const nowPos2={x:e.touches[1].clientX,y:e.touches[1].clientY};
-            const prevTransform=gesture2.transform;
+        </div>
 
-            let scaleX=Math.abs(prevTransform.xScale*(nowPos1.x-nowPos2.x)/(gesture2.start1.x-gesture2.start2.x));
-            let scaleY=Math.abs(prevTransform.yScale*(nowPos1.y-nowPos2.y)/(gesture2.start1.y-gesture2.start2.y));
-            if(Math.abs(nowPos2.y-nowPos1.y)<100) {
-                scaleY = transform.yScale;
-            }
-            if(Math.abs(nowPos2.x-nowPos1.x)<100) {
-                scaleX = transform.xScale;
-            }
-            let x1=prevTransform.x+gesture2.start1.x/prevTransform.xScale-nowPos1.x/scaleX;
-            let y1=prevTransform.y+gesture2.start1.y/prevTransform.yScale-nowPos1.y/scaleY;
-            let x2=prevTransform.x+gesture2.start2.x/prevTransform.xScale-nowPos2.x/scaleX;
-            let y2=prevTransform.y+gesture2.start2.y/prevTransform.yScale-nowPos2.y/scaleY;
-            let x=(x1+x2)/2;
-            let y=(y1+y2)/2;
-
-
-            setGesture2(prev=>{return{
-                isXDrag:Math.abs(e.touches[0].clientX-e.touches[1].clientX)>100,
-                isYDrag:Math.abs(e.touches[0].clientY-e.touches[1].clientY)>100,
-                transform:prev.transform,
-                start1: prev.start1,
-                start2: prev.start2,
-                moving1: nowPos1,
-                moving2: nowPos2
-            }});
-            setTransform((prev)=> {
-                const res = {
-                    x: x,
-                    y: y,
-                    xScale: scaleX,
-                    yScale: scaleY
-                }
-                res.y=Ypos(res,diaRect);
-
-                return res;
-            });
-        }
-    }}
-    onTouchEnd={(e)=>{
-        if(e.touches.length===1) {
-            setGesture({
-                isDrag:true,
-                start1:{x:e.touches[0].clientX,y:e.touches[0].clientY},
-                moving:{x:e.touches[0].clientX,y:e.touches[0].clientY}
-            });
-        }
-        if(e.touches.length===2) {
-            setGesture2({
-                isXDrag:Math.abs(e.touches[0].clientX-e.touches[1].clientX)>100,
-                isYDrag:Math.abs(e.touches[0].clientY-e.touches[1].clientY)>100,
-                transform:transform,
-                start1:{x:e.touches[0].clientX,y:e.touches[0].clientY},
-                moving1:{x:e.touches[0].clientX,y:e.touches[0].clientY},
-                start2:{x:e.touches[1].clientX,y:e.touches[1].clientY},
-                moving2:{x:e.touches[1].clientX,y:e.touches[1].clientY}
-            });
-        }
-    }}
->
-    </canvas>
-);
+    );
 }
 
 export default DiagramPage;
 
-const getAD=(stopTime:StopTime)=>{
-    if(stopTime.ariTime>=0){
+const getAD = (stopTime: StopTime) => {
+    if (stopTime.ariTime >= 0) {
         return stopTime.ariTime;
     }
     return stopTime.depTime;
@@ -609,12 +665,7 @@ interface DiagramLine{
     points:Point[];
 }
 
-interface DiagramTransform{
-    x:number;
-    y:number;
-    xScale:number;
-    yScale:number;
-}
+
 
 interface Point{
     x:number;
