@@ -14,6 +14,7 @@ import {useNavigate, useParams} from "react-router-dom";
 import { StationHeaderView } from "./StationHeaderView";
 import {BottomMenu} from "../Menu/BottomMenu";
 import { HolizontalBoxList } from "./HolizontalBoxList";
+import {useLocation} from "react-use";
 
 
 export interface TimeTablePageSetting{
@@ -26,20 +27,36 @@ export default function TimeTablePage() {
     const [trains, setTrains] = useState<{[key:number]:Train}>({});
     const [routeInfo, setRouteInfo] = useState<{[key:number]:RouteInfo}>({});
     const [routes, setRoutes] = useState<{[key:number]:Route}>({});
+    const [selectedTrip,setSelectedTrip]=useState<number>(-1);
     const navigate=useNavigate();
     const [setting,setSetting]=useState<TimeTablePageSetting>({
         fontSize:13,
         lineHeight:1.1
     });
+    const search = useLocation().search;
+    const query = new URLSearchParams(search);
+    const tripID = Number.parseInt(query.get('tripID')??'-1');
+
     const MemoTripView = memo(TripView);
     const MemoTripNameView = memo(TripNameView);
-
     const param = useParams<{ routeID:string,direct: string  }>();
     const routeID=parseInt(param.routeID??"0");
     const direct=parseInt(param.direct??"0");
 
+    let setScrollX:undefined|((scrollX:number)=>void)=undefined;
+    let setScrollX2:undefined|((scrollX:number)=>void)=undefined;
 
-
+    useEffect(() => {
+        console.log(tripID,setScrollX,setScrollX2);
+        if(setScrollX!==undefined&&setScrollX2!==undefined&&tripID!==-1){
+            const index=getTrips().findIndex((trip)=>trip.tripID===tripID);
+            if(index!==-1){
+                const index2=Math.max(0,index-5);
+                setScrollX(index2*setting.fontSize*2.2);
+            }
+        }
+        setSelectedTrip(tripID);
+    }, [tripID,routes]);
    useEffect(() => {
        loadCompany().then((company)=>{
            setStations(company.stations);
@@ -79,20 +96,7 @@ export default function TimeTablePage() {
             return routes[routeID].upTrips;
         }
     }
-   //  useEffect(() => {
-   //      window.onscroll=(e=>{
-   //          requestAnimationFrame(()=>{
-   //              console.log("test")
-   //              const tripNameLayout=document.getElementById("tripNameLayout")
-   //              if(tripNameLayout!==null){
-   //                  tripNameLayout.style.left=-window.scrollX+"px";
-   //              }
-   //              if(stationViewLayout!==null){
-   //                  stationViewLayout.style.top=-window.scrollY+"px";
-   //              }
-   //          });
-   //      })
-   // }, []);
+
     const getStationProps=useMemo(()=>{
         if(routes[routeID]===undefined){
             return [];
@@ -115,8 +119,9 @@ export default function TimeTablePage() {
     }
     const Column = ( index:number, style:any) => {
         const trip=getTrips()[index];
+        const selected=trip.tripID===selectedTrip;
         return (
-            <div key={trip.tripID} id='a' style={style}>
+            <div key={trip.tripID} className={selected?"selected":""} style={style}>
             <MemoTripView  trip={trip} type={trainTypes[trip.trainTypeID]}
                       setting={setting} stations={getStationProps} allStations={stations}
                       train={trains[trip.trainID]}
@@ -127,8 +132,9 @@ export default function TimeTablePage() {
     }
     const Column2 = (index:number, style:any) => {
         const trip=getTrips()[index];
+        const selected=trip.tripID===selectedTrip;
         return (
-            <div id="a"key={trip.tripID} style={{...style,height:`${getTripNameViewHeight(setting)}px`,borderBottom:'2px solid black'}}>
+            <div className={selected?"selected":""} key={trip.tripID} style={{...style,height:`${getTripNameViewHeight(setting)}px`,borderBottom:'2px solid black'}}>
                 <MemoTripNameView key={trip.tripID} trip={trip} type={trainTypes[trip.trainTypeID]}
                               setting={setting}
                               train={trains[trip.trainID]}
@@ -138,7 +144,6 @@ export default function TimeTablePage() {
             </div>
         );
     }
-    let setScrollX:undefined|((scrollX:number)=>void)=undefined;
     return (
         <div style={{width: '100%',height:'100%',fontSize: `${setting.fontSize}px`, lineHeight: `${setting.fontSize * setting.lineHeight}px`}}>
             <div style={{display: "flex", width: '100%', height: '100%', paddingBottom: "70px",zIndex:5}}>
@@ -177,7 +182,7 @@ export default function TimeTablePage() {
                             itemCount={getTrips().length}
                             itemSize={(setting.fontSize * 2.2)}
                             getSetScrollX={(_setScrollX)=> {
-                                setScrollX=_setScrollX;
+                                setScrollX2=_setScrollX;
                             }
                             }
                         >
@@ -203,12 +208,17 @@ export default function TimeTablePage() {
                                                   if(stationViewLayout!==null){
                                                     stationViewLayout.style.top=-scrollY+"px";
                                                   }
-                                                  if(setScrollX!==undefined) {
-                                                      setScrollX(_scrollX);
+                                                  if(setScrollX2!==undefined) {
+                                                      setScrollX2(_scrollX);
                                                   }
                                                 }
                                             }
-                                           >
+                                           getSetScrollX={(_setScrollX)=> {
+                                               setScrollX=_setScrollX;
+                                           }
+                                           }
+
+                        >
                             {Column}
                         </HolizontalBoxList>
                     </div>

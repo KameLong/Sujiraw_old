@@ -39,7 +39,7 @@ export function HolizontalBoxList({children,itemCount,itemSize,onScroll,getSetSc
     if(getSetScrollX!==undefined){
         getSetScrollX(setScroll);
     }
-    const startIndex=Math.max(0,Math.floor(scrollX/itemSize)-5);
+    const startIndex=Math.min(itemCount,Math.max(0,Math.floor(scrollX/itemSize)-5));
     const endIndex=Math.min(itemCount,Math.ceil((scrollX+(ref.current?.offsetWidth??0))/itemSize)+5);
     return (
         <div

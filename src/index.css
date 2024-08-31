@@ -42,6 +42,9 @@ code {
   min-width:100%;
   text-align-last: justify;
 }
+.selected{
+  background-color: #FFFFBB;
+}
 *{
   box-sizing: border-box;
   /*overflow: hidden;*/

@@ -2,6 +2,7 @@ import {Station, Train, TrainType, Trip} from "../DiaData/DiaData";
 import {TimeTablePageSetting} from "./TimeTablePage";
 import {useEffect, useRef} from "react";
 import {timeIntStr} from "./Util";
+import {useNavigate} from "react-router-dom";
 
 interface TripNameViewProps {
     trip: Trip;
@@ -17,6 +18,8 @@ export function getTripNameViewHeight(setting: TimeTablePageSetting) {
 
 export function TripNameView({trip,train, type, setting,stations}: TripNameViewProps) {
     const ref = useRef<HTMLDivElement | null>(null);
+    const navigate=useNavigate();
+
 
     function hasOuterStation(){
         const routeID=trip.routeID;
@@ -74,6 +77,17 @@ export function TripNameView({trip,train, type, setting,stations}: TripNameViewP
             <div style={{flexGrow:1}}></div>
             <div style={{borderTop: '2px solid black'}}>
             </div>
+            <div onClick={()=>{
+                if(hasOuterStation()) {
+                    const tripInfos=train.tripInfos.sort((a,b)=>a.ariTime-b.ariTime);
+                    const index=tripInfos.findIndex((value)=>value.routeID===trip.routeID);
+                    if(index===-1||index===0){
+                        return;
+                    }
+                    navigate(`/timetable/${tripInfos[index-1].routeID}/0?tripID=${tripInfos[index-1].tripID}`)
+                }
+            }}>
+
             {hasOuterStation()?(
                 <div className={"nowrap"}
                 >
@@ -91,6 +105,8 @@ export function TripNameView({trip,train, type, setting,stations}: TripNameViewP
             >
                 {outerStationTime()}
             </div>
+            </div>
+
 
         </div>
     )

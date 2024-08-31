@@ -3,6 +3,7 @@ import React, {useEffect, useRef} from "react";
 import {TimeTablePageSetting} from "./TimeTablePage";
 import {StationProps} from "./StationView";
 import {timeIntStr} from "./Util";
+import {useNavigate} from "react-router-dom";
 
 interface TripViewProps {
     trip: Trip;
@@ -18,6 +19,8 @@ interface TripViewProps {
 
 export function TripView({trip, type, setting, stations, direction,train,allStations}: TripViewProps) {
     const ref = useRef<HTMLDivElement | null>(null);
+    const navigate=useNavigate();
+
 
 
     useEffect(() => {
@@ -136,6 +139,9 @@ export function TripView({trip, type, setting, stations, direction,train,allStat
         }
         return timeIntStr(train.ariTime);
     }
+    if(type===undefined){
+        return <div>error</div>
+    }
 
 
 
@@ -189,7 +195,16 @@ export function TripView({trip, type, setting, stations, direction,train,allStat
             }
             <div style={{borderTop: '2px solid black'}}>
             </div>
-            <div>
+            <div onClick={()=>{
+                if(hasOuterStation()) {
+                    const tripInfos=train.tripInfos.sort((a,b)=>a.ariTime-b.ariTime);
+                    const index=tripInfos.findIndex((value)=>value.routeID===trip.routeID);
+                    if(index===-1||index===tripInfos.length-1){
+                        return;
+                    }
+                    navigate(`/timetable/${tripInfos[index+1].routeID}/0?tripID=${tripInfos[index+1].tripID}`)
+                }
+            }}>
                 {hasOuterStation() ? (
                     <div className={"nowrap"}
                     >
