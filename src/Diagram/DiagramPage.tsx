@@ -1,9 +1,11 @@
 
 
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import { DiagramStation, DiagramTrip} from "./DiagramData";
 import {useParams} from "react-router-dom";
 import {Company, fetchGzipJson, Route, RouteInfo, Station, StopTime, Train, TrainType} from "../DiaData/DiaData";
+import {DiagramCanvas, DiagramLine, DiagramTransformC, Point} from "./DiagramCanvas";
+import {Transform} from "node:stream";
 
 let befTime=Date.now();
 export const usePreventDefault = <T extends HTMLElement>(
@@ -33,141 +35,24 @@ export const usePreventDefault = <T extends HTMLElement>(
 
 
 const fontSize=10;
-function DrawLine(ctx:CanvasRenderingContext2D,x1:number,y1:number,x2:number,y2:number,width:number,color:string,transform:DiagramTransform,SCALE :number){
-    ctx.beginPath();
-    ctx.strokeStyle = color;
-    ctx.lineWidth=width*SCALE;
-    ctx.moveTo((x1-transform.x)*transform.xScale*SCALE, (y1-transform.y)*transform.yScale*SCALE);
-    ctx.lineTo((x2-transform.x)*transform.xScale*SCALE, (y2-transform.y)*transform.yScale*SCALE);
-    ctx.stroke();
-}
-function DrawText(ctx:CanvasRenderingContext2D,text:string,x:number,y:number,transform:DiagramTransform,SCALE :number) {
-    ctx.font = `${fontSize*SCALE}px sans-serif`;
-    ctx.fillText(text,(x-transform.x)*transform.xScale*SCALE,1.5*fontSize*SCALE);
 
+const transform:DiagramTransform={
+    x:0,
+    y:-fontSize*3,
+    xScale:0.1,
+    yScale:0.4
 }
 
-function DrawTimeHeader(canvas:CanvasRenderingContext2D,verticalAxis:number,transform:DiagramTransform,diaRect:DiagramRect,SCALE :number){
-    //時間軸表示に合わせて描画する内容を切り替える
-    //隣の文字との間隔が狭くなる時は一部の表示を無くすことで文字がかぶらないようにする
-    canvas.fillStyle = "#888";
-    switch(verticalAxis) {
-        case 0:
-            for (let i = 0; i < 24; i++) {
-                DrawText(canvas, i.toString(), i * 3600, -50, transform, SCALE);
-            }
-            break;
-        case 2:
-            if (fontSize * 5 < 20 * 60 * transform.xScale) {
-                for (let i = 0; i < 24; i++) {
-                    DrawText(canvas, i + ":00", ((i ) * 3600), -fontSize, transform, SCALE);
-                    DrawText(canvas, i + ":20", ((i ) * 3600 + 1200), -fontSize, transform, SCALE);
-                    DrawText(canvas, i + ":40", ((i ) * 3600 + 2400), -fontSize, transform, SCALE);
-                }
-            } else {
-                for (let i = 0; i < 24; i++) {
-                    DrawText(canvas, i.toString(), i * 3600, -50, transform, SCALE);
-                }
-            }
-            break;
-        // @ts-ignore
-        case 3:
-            if (fontSize * 5 < 15 * 60 * transform.xScale) {
-                for (let i = 0; i < 24; i++) {
-                    DrawText(canvas, i + ":15", (i  * 3600 + 900), -fontSize, transform, SCALE);
-                    DrawText(canvas, i + ":45", (i  * 3600 + 2700), -fontSize, transform, SCALE);
-                }
-            }
-        case 1:
-            if (fontSize * 5 < 30 * 60 * transform.xScale) {
-                for (let i = 0; i < 24; i++) {
-                    DrawText(canvas, i + ":00", (i * 3600 ), -fontSize, transform, SCALE);
-                    DrawText(canvas, i + ":30", (i * 3600 + 1800), -fontSize, transform, SCALE);
-                }
-            } else {
-                for (let i = 0; i < 24; i++) {
-                    DrawText(canvas, i.toString(), i * 3600, -50, transform, SCALE);
-                }
-            }
-            break;
-        // @ts-ignore
-        case 7:
-            if (fontSize * 5 < 5 * 60 * transform.xScale) {
-                for (let i = 0; i < 24; i++) {
-                    DrawText(canvas, i + ":05", (i * 3600 + 300), -fontSize, transform, SCALE);
-                    DrawText(canvas, i + ":15", (i* 3600 + 900), -fontSize, transform, SCALE);
-                    DrawText(canvas, i + ":25", (i* 3600 + 1500), -fontSize, transform, SCALE);
-                    DrawText(canvas, i + ":35", (i* 3600 + 2100), -fontSize, transform, SCALE);
-                    DrawText(canvas, i + ":45", (i* 3600 + 2700), -fontSize, transform, SCALE);
-                    DrawText(canvas, i + ":55", (i* 3600 + 3300), -fontSize, transform, SCALE);
-                }
-            }
-        case 6:
-        case 5:
-        case 4:
-            if (fontSize * 5 < 10 * 60 * transform.xScale) {
-                for (let i = 0; i < 24; i++) {
-                    DrawText(canvas, i + ":10", (i * 3600 + 600), -fontSize, transform, SCALE);
-                    DrawText(canvas, i + ":20", (i * 3600 + 1200), -fontSize, transform, SCALE);
-                    DrawText(canvas, i + ":40", (i * 3600 + 2400), -fontSize, transform, SCALE);
-                    DrawText(canvas, i + ":50", (i * 3600 + 3000), -fontSize, transform, SCALE);
-                }
-            }
-            if (fontSize * 5 < 30 * 60 * transform.xScale) {
-                for (let i = 0; i < 24; i++) {
-                    DrawText(canvas, i + ":00", (i* 3600 + 0), -fontSize, transform, SCALE);
-                    DrawText(canvas, i + ":30", (i * 3600 + 1800), -fontSize, transform, SCALE);
-                }
-            } else {
-                for (let i = 0; i < 24; i++) {
-                    DrawText(canvas, i.toString(), i * 3600, -50, transform, SCALE);
-                }
-            }
-            break;
-    }
-    canvas.fillStyle = "#000";
-
-}
-
-function DrawVerticalAxis(ctx:CanvasRenderingContext2D,verticalAxis:number,transform:DiagramTransform,diaRect:DiagramRect,SCALE :number){
-
-    switch (verticalAxis){
-        case 1:
-            for (let i = 0; i < 24; i++) {
-                //30分ごとの目盛
-                DrawLine(ctx,i*3600+1800,diaRect.yStart,i*3600+1800,diaRect.yEnd,1,"#AAA",transform,SCALE);
-            }
-            break;
-        case 2:
-            //20分ごとの目盛
-            for (let i = 0; i < 24; i++) {
-                DrawLine(ctx,i*3600+1200,diaRect.yStart,i*3600+1200,diaRect.yEnd,1,"#AAA",transform,SCALE);
-                DrawLine(ctx,i*3600+2400,diaRect.yStart,i*3600+2400,diaRect.yEnd,1,"#AAA",transform,SCALE);
-            }
-            break;
-        case 3:
-            //15分ごとの目盛
-            for (let i = 0; i < 24; i++) {
-                DrawLine(ctx,i*3600+900,diaRect.yStart,i*3600+900,diaRect.yEnd,1,"#AAA",transform,SCALE);
-                DrawLine(ctx,i*3600+1800,diaRect.yStart,i*3600+1800,diaRect.yEnd,1,"#AAA",transform,SCALE);
-                DrawLine(ctx,i*3600+2700,diaRect.yStart,i*3600+2700,diaRect.yEnd,1,"#AAA",transform,SCALE);
-            }
-            break;
-        case 4:
-            //10分ごとの目盛
-            for (let i = 0; i < 24; i++) {
-                DrawLine(ctx,i*3600+600,diaRect.yStart,i*3600+600,diaRect.yEnd,0.5,"#AAA",transform,SCALE);
-                DrawLine(ctx,i*3600+1200,diaRect.yStart,i*3600+1200,diaRect.yEnd,0.5,"#AAA",transform,SCALE);
-                DrawLine(ctx,i*3600+2400,diaRect.yStart,i*3600+2400,diaRect.yEnd,0.5,"#AAA",transform,SCALE);
-                DrawLine(ctx,i*3600+3000,diaRect.yStart,i*3600+3000,diaRect.yEnd,0.5,"#AAA",transform,SCALE);
-            }
-            for (let i = 0; i < 24; i++) {
-                DrawLine(ctx,i*3600+1800,diaRect.yStart,i*3600+1800,diaRect.yEnd,1,"#AAA",transform,SCALE);
-            }
-            break;
-    }
-
-}
+const gesture2:Gesture2={
+    isAction:false,
+    isXDrag:false,
+    isYDrag:false,
+    transform:transform,
+    start1:{x:0,y:0},
+    moving1:{x:0,y:0},
+    start2:{x:0,y:0},
+    moving2:{x:0,y:0}
+};
 
 
 function DiagramPage() {
@@ -180,6 +65,8 @@ function DiagramPage() {
     const [routeInfo, setRouteInfo] = useState<{[key:number]:RouteInfo}>({});
     const [routes, setRoutes] = useState<{[key:number]:Route}>({});
     const SCALE:number=window.devicePixelRatio;
+    //const SCALE:number=1;
+    console.log(SCALE);
 
     function Ypos(transform:DiagramTransform,diagramRect:DiagramRect){
         const windowHeight=window.innerHeight*SCALE;
@@ -204,6 +91,7 @@ function DiagramPage() {
     const [routeStations, setRouteStations] = useState<DiagramStation[]>([]);
     const [downTrips, setDownTrips] = useState<DiagramTrip[]>([]);
     const [upTrips, setUpTrips] = useState<DiagramTrip[]>([]);
+    const [diagramCanvas,setDiagramCanvas]=useState<DiagramCanvas>(new DiagramCanvas(undefined));
 
 
     const [downLines,setDownLines]=useState<DiagramLine[]>([]);
@@ -294,32 +182,20 @@ function DiagramPage() {
 
     }
 
-    const [transform,setTransform]=useState<DiagramTransform>({
-        x:3600*6,
-        y:-fontSize*3*SCALE,
-        xScale:0.03*SCALE,
-        yScale:0.1*SCALE
-    });
+    // const [transform,setTransform]=useState<DiagramTransform>({
+    //     x:3600*6,
+    //     y:-fontSize*3*SCALE,
+    //     xScale:0.1*SCALE,
+    //     yScale:0.4*SCALE
+    // });
     const [diaRect,setDiaRect]=useState<DiagramRect>({
         yStart:0,
         yEnd:0,
         xStart:3600*3,
         xEnd:3600*27
     });
-    const [gesture,setGesture]=useState<Gesture>({
-        isDrag:false,
-        start1:{x:0,y:0},
-        moving:{x:0,y:0}
-    });
-    const [gesture2,setGesture2]=useState<Gesture2>({
-        isXDrag:false,
-        isYDrag:false,
-        transform:transform,
-        start1:{x:0,y:0},
-        moving1:{x:0,y:0},
-        start2:{x:0,y:0},
-        moving2:{x:0,y:0}
-    });
+
+
 
 
 
@@ -335,139 +211,37 @@ function DiagramPage() {
 
     useEffect(() => {
         const canvas=(document.getElementById("test") as  HTMLCanvasElement);
+        if(canvas===null||canvas===undefined){
+            return;
+        }
         canvas.width=canvas.clientWidth*SCALE;
         canvas.height=canvas.clientHeight*SCALE;
+        const diagramCanvas= new DiagramCanvas(canvas);
+        if(!diagramCanvas.ctx){
+            return;
+        }
+        diagramCanvas.transform=new DiagramTransformC(transform.x,transform.y,transform.xScale,transform.yScale,SCALE);
+        diagramCanvas.diaRect=diaRect;
+        console.log("diagramCanvas");
+        setDiagramCanvas(diagramCanvas);
+    }, [diaRect,]);
 
-    }, []);
-    useEffect(() => {
-       // render();
-
-    }, [transform]);
     useEffect(() => {
         // render(true);
     }, [downLines,upLines]);
 
-
-    (function loop(){
-        window.requestAnimationFrame(loop);
-        render();
-    })();
-
-    function render(force:boolean=false){
-        const canvas=(document.getElementById("test") as  HTMLCanvasElement);
-        const ctx = canvas?.getContext("2d");
-        if(ctx===null||ctx===undefined){
-            return;
-        };
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-        DrawVerticalAxis(ctx,4,transform,diaRect,SCALE);
-
-        for(let h=3;h<28;h++){
-            ctx.beginPath();
-            ctx.strokeStyle = "#AAA";
-            ctx.lineWidth = 2*SCALE;
-            ctx.moveTo((h*3600-transform.x)*transform.xScale*SCALE, (diaRect.yStart-transform.y)*transform.yScale*SCALE);
-            ctx.lineTo((h*3600-transform.x)*transform.xScale*SCALE, (diaRect.yEnd-transform.y)*transform.yScale*SCALE);
-            ctx.stroke();
-        }
-        for(let station of routeStations){
-            let width=1;
-            if(station.main){
-                width=2;
-            }
-            if(routeStations[0]===station||routeStations.slice(-1)[0]===station){
-                width=2;
-            }
-            ctx.beginPath();
-            ctx.strokeStyle = "#808080";
-            ctx.lineWidth = width;
-            ctx.moveTo((diaRect.xStart-transform.x)*transform.xScale*SCALE, (station.stationTime-transform.y)*transform.yScale*SCALE);
-            ctx.lineTo((diaRect.xEnd-transform.x)*transform.xScale*SCALE, (station.stationTime-transform.y)*transform.yScale*SCALE);
-            ctx.stroke();
-        }
-
-        downLines.forEach(item=>{
-            if(item.points.length<2){
-                return;
-            }
-            ctx.beginPath();
-            ctx.strokeStyle = item.color;
-            ctx.lineWidth = SCALE;
-            ctx.moveTo((item.points[0].x-transform.x)*transform.xScale*SCALE, (item.points[0].y-transform.y)*transform.yScale*SCALE);
-            for(let i=1;i<item.points.length;i++){
-                ctx.lineTo((item.points[i].x-transform.x)*transform.xScale*SCALE, (item.points[i].y-transform.y)*transform.yScale*SCALE);
-            }
-            ctx.stroke();
-
-
-
-
-            const numberText=item.number;
-            ctx.save();
-            ctx.translate((item.points[0].x-transform.x)*transform.xScale*SCALE, (item.points[0].y-transform.y)*transform.yScale*SCALE);
-            ctx.rotate(Math.atan2((item.points[1].y-item.points[0].y)*transform.yScale,(item.points[1].x-item.points[0].x)*transform.xScale));
-            ctx.fillText(numberText,0,0);
-            ctx.restore();
-        });
-        upLines.forEach(item=>{
-            if(item.points.length<2){
-                return;
-            }
-            ctx.beginPath();
-            ctx.strokeStyle = item.color;
-            ctx.lineWidth = SCALE;
-            ctx.moveTo((item.points[0].x-transform.x)*transform.xScale*SCALE, (item.points[0].y-transform.y)*transform.yScale*SCALE);
-            for(let i=1;i<item.points.length;i++){
-                ctx.lineTo((item.points[i].x-transform.x)*transform.xScale*SCALE, (item.points[i].y-transform.y)*transform.yScale*SCALE);
-            }
-            ctx.stroke();
-
-            const numberText=item.number;
-            ctx.save();
-            ctx.translate((item.points[0].x-transform.x)*transform.xScale*SCALE, (item.points[0].y-transform.y)*transform.yScale*SCALE);
-            ctx.rotate(Math.atan2((item.points[1].y-item.points[0].y)*transform.yScale,(item.points[1].x-item.points[0].x)*transform.xScale));
-            ctx.fillText(numberText,0,0);
-            ctx.restore();
-        })
-
-
-        ctx.clearRect(0,0,canvas.width,1.8*SCALE*fontSize);
-        DrawTimeHeader(ctx,4,transform,diaRect,SCALE);
-
-        const stationViewWidth=80*SCALE;
-        ctx.beginPath();
-        ctx.fillStyle = "#FFFFFF";
-        ctx.rect(0, 0, stationViewWidth, 1000*SCALE);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.strokeStyle = "#808080";
-        ctx.lineWidth = 4;
-        ctx.moveTo(stationViewWidth, (diaRect.yStart-transform.y)*transform.yScale*SCALE);
-        ctx.lineTo(stationViewWidth, (diaRect.yEnd-transform.y)*transform.yScale*SCALE);
-        ctx.stroke();
-
-        for(let station of routeStations){
-            let width=1;
-            if(station.main){
-                width=2;
-            }
-            if(routeStations[0]===station||routeStations.slice(-1)[0]===station){
-                width=2;
-            }
-            ctx.beginPath();
-            ctx.strokeStyle = "#808080";
-            ctx.lineWidth = width;
-            ctx.moveTo(0, (station.stationTime-transform.y)*transform.yScale*SCALE);
-            ctx.lineTo(stationViewWidth, (station.stationTime-transform.y)*transform.yScale*SCALE);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.fillStyle = "#000000";
-            ctx.font = `${12*SCALE}px sans-serif`;
-            ctx.textAlign = "left";
-            ctx.textBaseline = "bottom";
-            ctx.fillText(station.station.name,5,(station.stationTime-transform.y)*transform.yScale*SCALE);
-        }
-    }
+    const render = useCallback(
+        (transform:DiagramTransformC) => {
+        diagramCanvas.Clear();
+        diagramCanvas.transform=transform;
+        diagramCanvas.DrawVerticalAxis(4);
+        diagramCanvas.DrawStationAxis(routeStations);
+         diagramCanvas.DrawTrips(downLines);
+         diagramCanvas.DrawTrips(upLines);
+        diagramCanvas.DrawTimeHeader(4);
+         diagramCanvas.DrawStations(routeStations);
+        }, [diagramCanvas]
+    );
 
     const ref=useRef<HTMLDivElement | null>(null);
     useEffect(() => {
@@ -476,39 +250,84 @@ function DiagramPage() {
         }
         ref.current.addEventListener('touchstart',(e)=>{
             if(e.touches.length>=2){
-                console.log(e)
+                gesture2.isAction=true;
                 e.preventDefault();
+                gesture2.isXDrag=Math.abs(e.touches[0].clientX-e.touches[1].clientX)>100;
+                gesture2.isYDrag=Math.abs(e.touches[0].clientY-e.touches[1].clientY)>100;
+                gesture2.start1={x:e.touches[0].clientX,y:e.touches[0].clientY};
+                gesture2.moving1={x:e.touches[0].clientX,y:e.touches[0].clientY};
+                gesture2.start2={x:e.touches[1].clientX,y:e.touches[1].clientY};
+                gesture2.moving2={x:e.touches[1].clientX,y:e.touches[1].clientY};
+                gesture2.transform={...transform};
+                gesture2.isAction=false;
             }
         });
+
         ref.current.addEventListener('touchmove',(e)=>{
             if(e.touches.length>=2){
-                console.log(e)
                 e.preventDefault();
-            }
+                if(gesture2.isAction){
+                    return;
+                }
+                gesture2.isAction=true;
+                const nowPos1={x:e.touches[0].clientX,y:e.touches[0].clientY};
+                const nowPos2={x:e.touches[1].clientX,y:e.touches[1].clientY};
+                const prevTransform=gesture2.transform;
+
+                let scaleX=Math.abs(prevTransform.xScale*(nowPos1.x-nowPos2.x)/(gesture2.start1.x-gesture2.start2.x));
+                let scaleY=Math.abs(prevTransform.yScale*(nowPos1.y-nowPos2.y)/(gesture2.start1.y-gesture2.start2.y));
+                if(Math.abs(nowPos2.y-nowPos1.y)<100) {
+                    scaleY = transform.yScale;
+                }
+                if(Math.abs(nowPos2.x-nowPos1.x)<100) {
+                    scaleX = transform.xScale;
+                }
+                // scaleY = transform.yScale;
+                // scaleX = transform.xScale;
+
+                const x1=-nowPos1.x+scaleX/prevTransform.xScale*(gesture2.start1.x+prevTransform.x);
+                const x2=-nowPos2.x+scaleX/prevTransform.xScale*(gesture2.start2.x+prevTransform.x);
+                const y1=-nowPos1.y+scaleY/prevTransform.yScale*(gesture2.start1.y+prevTransform.y);
+                const y2=-nowPos2.y+scaleY/prevTransform.yScale*(gesture2.start2.y+prevTransform.y);
+                let x=(x1+x2)/2;
+                let y=(y1+y2)/2;
+                ref.current?.scrollTo(x,y);
+                console.log(x,y,transform.x,transform.y);
+                gesture2.isXDrag=Math.abs(e.touches[0].clientX-e.touches[1].clientX)>100;
+                gesture2.isYDrag=Math.abs(e.touches[0].clientY-e.touches[1].clientY)>100;
+                gesture2.moving1= nowPos1;
+                gesture2.moving2= nowPos2;
+
+                transform.xScale=scaleX;
+                transform.yScale=scaleY;
+                transform.x=x;
+                transform.y=y;
+                document.getElementById("dummy")!.style.width=24*3600*transform.xScale+"px";
+                document.getElementById("dummy")!.style.height=diaRect.yEnd*transform.yScale+"px";
+
+                    gesture2.isAction=false;
+                requestAnimationFrame(()=>render(new DiagramTransformC(transform.x/transform.xScale,(transform.y)/transform.yScale,transform.xScale,transform.yScale,SCALE)));
+         }
         });
         ref.current.addEventListener('touchend',(e)=>{
             if(e.touches.length>=2){
-                console.log(e)
                 e.preventDefault();
             }
         });
-
+    }, []);
+    useEffect(() => {
+        if(!ref.current){
+            return;
+        }
        ref.current.onscroll = (e) => {
             const target=e.target as HTMLDivElement;
-            setTransform((prev)=>{
-                const res={
-                    x:(target.scrollLeft)/prev.xScale,
-                    y:(target.scrollTop)/prev.yScale,
-                    xScale:prev.xScale,
-                    yScale:prev.yScale
-                }
-                res.y=Ypos(res,diaRect);
-                return res
-            });
-            // console.log(target.scrollLeft,target.scrollTop);
+            transform.x=(target.scrollLeft);
+            transform.y=(target.scrollTop);
+           requestAnimationFrame(()=>render(new DiagramTransformC(transform.x,transform.y,transform.xScale,transform.yScale,SCALE)));
+            console.log(target.scrollLeft,target.scrollTop);
         }
 
-    }, []);
+    }, [render]);
 
 
 
@@ -521,114 +340,9 @@ function DiagramPage() {
         >
             <canvas
                 id="test" style={{position: 'fixed',pointerEvents: 'none', width: '100%', height: '100%', overflowY: 'hidden'}}
-                // onTouchStart={(e)=>{
-                //     if(e.touches.length===1) {
-                //         setGesture({
-                //             isDrag:true,
-                //             start1:{x:e.touches[0].clientX,y:e.touches[0].clientY},
-                //             moving:{x:e.touches[0].clientX,y:e.touches[0].clientY}
-                //         });
-                //     }
-                //     if(e.touches.length===2) {
-                //         setGesture2({
-                //             isXDrag:Math.abs(e.touches[0].clientX-e.touches[1].clientX)>100,
-                //             isYDrag:Math.abs(e.touches[0].clientY-e.touches[1].clientY)>100,
-                //             transform:transform,
-                //             start1:{x:e.touches[0].clientX,y:e.touches[0].clientY},
-                //             moving1:{x:e.touches[0].clientX,y:e.touches[0].clientY},
-                //             start2:{x:e.touches[1].clientX,y:e.touches[1].clientY},
-                //             moving2:{x:e.touches[1].clientX,y:e.touches[1].clientY}
-                //         });
-                //     }
-                //     e.preventDefault();
-                //
-                // }}
-                // onTouchMove={(e)=>{
-                //     if(e.touches.length===1) {
-                //         console.log("2");
-                //
-                //         setTransform((prev)=>{
-                //             const res = {
-                //                 x: prev.x - (e.touches[0].clientX - gesture.moving.x) / prev.xScale,
-                //                 y: prev.y - (e.touches[0].clientY - gesture.moving.y) / prev.yScale,
-                //                 xScale: prev.xScale,
-                //                 yScale: prev.yScale
-                //             }
-                //             res.y=Ypos(res,diaRect);
-                //             return res
-                //         });
-                //         setGesture(prev=>{return{
-                //             isDrag: true,
-                //             start1: prev.start1,
-                //             moving: {x: e.touches[0].clientX, y: e.touches[0].clientY}
-                //         }});
-                //     }
-                //     if(e.touches.length===2) {
-                //         const nowPos1={x:e.touches[0].clientX,y:e.touches[0].clientY};
-                //         const nowPos2={x:e.touches[1].clientX,y:e.touches[1].clientY};
-                //         const prevTransform=gesture2.transform;
-                //
-                //         let scaleX=Math.abs(prevTransform.xScale*(nowPos1.x-nowPos2.x)/(gesture2.start1.x-gesture2.start2.x));
-                //         let scaleY=Math.abs(prevTransform.yScale*(nowPos1.y-nowPos2.y)/(gesture2.start1.y-gesture2.start2.y));
-                //         if(Math.abs(nowPos2.y-nowPos1.y)<100) {
-                //             scaleY = transform.yScale;
-                //         }
-                //         if(Math.abs(nowPos2.x-nowPos1.x)<100) {
-                //             scaleX = transform.xScale;
-                //         }
-                //         let x1=prevTransform.x+gesture2.start1.x/prevTransform.xScale-nowPos1.x/scaleX;
-                //         let y1=prevTransform.y+gesture2.start1.y/prevTransform.yScale-nowPos1.y/scaleY;
-                //         let x2=prevTransform.x+gesture2.start2.x/prevTransform.xScale-nowPos2.x/scaleX;
-                //         let y2=prevTransform.y+gesture2.start2.y/prevTransform.yScale-nowPos2.y/scaleY;
-                //         let x=(x1+x2)/2;
-                //         let y=(y1+y2)/2;
-                //
-                //
-                //         setGesture2(prev=>{return{
-                //             isXDrag:Math.abs(e.touches[0].clientX-e.touches[1].clientX)>100,
-                //             isYDrag:Math.abs(e.touches[0].clientY-e.touches[1].clientY)>100,
-                //             transform:prev.transform,
-                //             start1: prev.start1,
-                //             start2: prev.start2,
-                //             moving1: nowPos1,
-                //             moving2: nowPos2
-                //         }});
-                //         setTransform((prev)=> {
-                //             const res = {
-                //                 x: x,
-                //                 y: y,
-                //                 xScale: scaleX,
-                //                 yScale: scaleY
-                //             }
-                //             res.y=Ypos(res,diaRect);
-                //
-                //             return res;
-                //         });
-                //     }
-                // }}
-                // onTouchEnd={(e)=>{
-                //     if(e.touches.length===1) {
-                //         setGesture({
-                //             isDrag:true,
-                //             start1:{x:e.touches[0].clientX,y:e.touches[0].clientY},
-                //             moving:{x:e.touches[0].clientX,y:e.touches[0].clientY}
-                //         });
-                //     }
-                //     if(e.touches.length===2) {
-                //         setGesture2({
-                //             isXDrag:Math.abs(e.touches[0].clientX-e.touches[1].clientX)>100,
-                //             isYDrag:Math.abs(e.touches[0].clientY-e.touches[1].clientY)>100,
-                //             transform:transform,
-                //             start1:{x:e.touches[0].clientX,y:e.touches[0].clientY},
-                //             moving1:{x:e.touches[0].clientX,y:e.touches[0].clientY},
-                //             start2:{x:e.touches[1].clientX,y:e.touches[1].clientY},
-                //             moving2:{x:e.touches[1].clientX,y:e.touches[1].clientY}
-                //         });
-                //     }
-                // }}
             >
             </canvas>
-            <div style={{
+            <div id="dummy" style={{
                 width: 24 * 3600 * transform.xScale,
                 height: transform.yScale * diaRect.yEnd
             }}>
@@ -659,24 +373,22 @@ const hasTime=(stopTime:StopTime)=>{
 }
 
 
-interface DiagramLine{
-    color:string;
-    number:string;
-    points:Point[];
-}
-
-
-
-interface Point{
+interface DiagramTransform{
     x:number;
     y:number;
+    xScale:number;
+    yScale:number;
 }
+
+
+
 interface Gesture{
     isDrag:boolean;
     start1:Point;
     moving:Point;
 }
 interface Gesture2{
+    isAction:boolean;
     isXDrag:boolean;
     isYDrag:boolean;
     transform:DiagramTransform;
