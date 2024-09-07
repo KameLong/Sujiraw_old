@@ -17,7 +17,6 @@ export class DiagramTransformC{
     xScale:number;
     yScale:number;
     diagramStartTime:number=3600*3;
-
     SCALE:number=1;
     constructor(x:number,y:number,xScale:number,yScale:number,SCALE:number){
         this.x=x;
@@ -27,10 +26,10 @@ export class DiagramTransformC{
         this.SCALE=SCALE;
     }
     public getCanvasX(x:number):number{
-        return ((x-this.diagramStartTime)*this.xScale-this.x)*this.SCALE;
+        return ((x-this.diagramStartTime)*this.xScale-this.x)*this.SCALE+80*this.SCALE;
     }
     public getCanvasY(y:number):number{
-        return ((y)*this.yScale-this.y)*this.SCALE;
+        return ((y)*this.yScale-this.y)*this.SCALE+30*this.SCALE;
     }
 
 }
@@ -87,6 +86,13 @@ export class DiagramCanvas{
         this.ctx.font = `${this.fontSize*this.transform.SCALE}px sans-serif`;
         this.ctx.fillText(text,this.transform.getCanvasX(x),this.transform.getCanvasY(y));
     }
+    DrawText_(text:string,x:number,y:number) {
+        if(this.ctx===undefined){
+            return;
+        }
+        this.ctx.font = `${this.fontSize*this.transform.SCALE}px sans-serif`;
+        this.ctx.fillText(text,x,y);
+    }
 
     DrawTimeHeader(verticalAxis:number){
         if(this.ctx===undefined){
@@ -95,7 +101,10 @@ export class DiagramCanvas{
         this.ctx.clearRect(0,0,86400*this.transform.SCALE*this.transform.xScale,1.8*this.fontSize*this.transform.SCALE);
 
         const drawHourMinText=(hour:number,min:number)=>{
-            this.DrawText(`${hour}:${min.toString().padStart(2,'0')}`,(hour*3600+min*60+86400-this.transform.diagramStartTime)%86400+this.transform.diagramStartTime,-50);
+            this.DrawText_(`${hour}:${min.toString().padStart(2,'0')}`,
+                this.transform.getCanvasX((hour*3600+min*60+86400-this.transform.diagramStartTime)%86400+this.transform.diagramStartTime),
+                this.fontSize*this.transform.SCALE*1.2);
+
         }
         //時間軸表示に合わせて描画する内容を切り替える
         //隣の文字との間隔が狭くなる時は一部の表示を無くすことで文字がかぶらないようにする
@@ -104,7 +113,8 @@ export class DiagramCanvas{
             case 0:
                 //1時間単位の表記
                 for (let i = 0; i < 24; i++) {
-                    this.DrawText(i.toString(), (i * 3600+86400-this.transform.diagramStartTime)%86400+this.transform.diagramStartTime, -50);
+                    this.DrawText(i.toString(), (i * 3600+86400-this.transform.diagramStartTime)%86400+this.transform.diagramStartTime,
+                        -(this.fontSize*this.transform.SCALE));
                 }
                 break;
             case 2:
@@ -117,7 +127,8 @@ export class DiagramCanvas{
                     }
                 } else {
                     for (let i = 0; i < 24; i++) {
-                        this.DrawText(i.toString(), (i * 3600+86400-this.transform.diagramStartTime)%86400+this.transform.diagramStartTime, -50);
+                        this.DrawText(i.toString(), (i * 3600+86400-this.transform.diagramStartTime)%86400+this.transform.diagramStartTime,
+                            -(this.fontSize*this.transform.SCALE));
                     }
                 }
                 break;
@@ -138,7 +149,8 @@ export class DiagramCanvas{
                     }
                 } else {
                     for (let i = 0; i < 24; i++) {
-                        this.DrawText(i.toString(), (i * 3600+86400-this.transform.diagramStartTime)%86400+this.transform.diagramStartTime, -50);
+                        this.DrawText(i.toString(), (i * 3600+86400-this.transform.diagramStartTime)%86400+this.transform.diagramStartTime,
+                            -(this.fontSize*this.transform.SCALE));
                     }
                 }
                 break;

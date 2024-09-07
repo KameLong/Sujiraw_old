@@ -5,32 +5,7 @@ import { DiagramStation, DiagramTrip} from "./DiagramData";
 import {useParams} from "react-router-dom";
 import {Company, fetchGzipJson, Route, RouteInfo, Station, StopTime, Train, TrainType} from "../DiaData/DiaData";
 import {DiagramCanvas, DiagramLine, DiagramTransformC, Point} from "./DiagramCanvas";
-import {Transform} from "node:stream";
 
-let befTime=Date.now();
-export const usePreventDefault = <T extends HTMLElement>(
-    eventName: string,
-    enable = true
-) => {
-    const ref = useRef<T>(null);
-    useEffect(() => {
-        const current = ref.current;
-        if (!current) {
-            return;
-        }
-        const handler = (event: Event) => {
-            if (enable) {
-                event.preventDefault();
-            }
-        };
-        current.addEventListener(eventName, handler);
-        return () => {
-            current.removeEventListener(eventName, handler);
-        };
-    }, [enable, eventName]);
-
-    return ref;
-};
 
 
 
@@ -43,16 +18,21 @@ const transform:DiagramTransform={
     yScale:0.4
 }
 
-const gesture2:Gesture2={
-    isAction:false,
-    isXDrag:false,
-    isYDrag:false,
-    transform:transform,
-    start1:{x:0,y:0},
-    moving1:{x:0,y:0},
-    start2:{x:0,y:0},
-    moving2:{x:0,y:0}
-};
+
+const zoomX:Gesture={
+    isDrag:false,
+    sPos:[0,0],
+    mPos:[0,0],
+    transform:transform
+}
+const zoomY:Gesture={
+    isDrag:false,
+    sPos:[0,0],
+    mPos:[0,0],
+    transform:transform
+}
+
+
 
 
 function DiagramPage() {
@@ -182,23 +162,13 @@ function DiagramPage() {
 
     }
 
-    // const [transform,setTransform]=useState<DiagramTransform>({
-    //     x:3600*6,
-    //     y:-fontSize*3*SCALE,
-    //     xScale:0.1*SCALE,
-    //     yScale:0.4*SCALE
-    // });
+
     const [diaRect,setDiaRect]=useState<DiagramRect>({
         yStart:0,
         yEnd:0,
         xStart:3600*3,
         xEnd:3600*27
     });
-
-
-
-
-
     useEffect(()=>{
         setDownLines(makeDiagramLine(downTrips));
     },[downTrips])
@@ -245,76 +215,96 @@ function DiagramPage() {
 
     const ref=useRef<HTMLDivElement | null>(null);
     useEffect(() => {
-        if(!ref.current){
+        if(ref.current===null){
             return;
-        }
-        ref.current.addEventListener('touchstart',(e)=>{
-            if(e.touches.length>=2){
-                gesture2.isAction=true;
-                e.preventDefault();
-                gesture2.isXDrag=Math.abs(e.touches[0].clientX-e.touches[1].clientX)>100;
-                gesture2.isYDrag=Math.abs(e.touches[0].clientY-e.touches[1].clientY)>100;
-                gesture2.start1={x:e.touches[0].clientX,y:e.touches[0].clientY};
-                gesture2.moving1={x:e.touches[0].clientX,y:e.touches[0].clientY};
-                gesture2.start2={x:e.touches[1].clientX,y:e.touches[1].clientY};
-                gesture2.moving2={x:e.touches[1].clientX,y:e.touches[1].clientY};
-                gesture2.transform={...transform};
-                gesture2.isAction=false;
             }
-        });
-
-        ref.current.addEventListener('touchmove',(e)=>{
+        const onTouchStart=(e:TouchEvent)=>{
             if(e.touches.length>=2){
-                e.preventDefault();
-                if(gesture2.isAction){
-                    return;
-                }
-                gesture2.isAction=true;
-                const nowPos1={x:e.touches[0].clientX,y:e.touches[0].clientY};
-                const nowPos2={x:e.touches[1].clientX,y:e.touches[1].clientY};
-                const prevTransform=gesture2.transform;
+                zoomX.isDrag=Math.abs(e.touches[0].clientX-e.touches[1].clientX)>100;
+                zoomX.transform={...transform}
+                zoomX.sPos=[e.touches[0].clientX,e.touches[1].clientX];
+                zoomX.mPos=[e.touches[0].clientX,e.touches[1].clientX];
 
-                let scaleX=Math.abs(prevTransform.xScale*(nowPos1.x-nowPos2.x)/(gesture2.start1.x-gesture2.start2.x));
-                let scaleY=Math.abs(prevTransform.yScale*(nowPos1.y-nowPos2.y)/(gesture2.start1.y-gesture2.start2.y));
-                if(Math.abs(nowPos2.y-nowPos1.y)<100) {
-                    scaleY = transform.yScale;
-                }
-                if(Math.abs(nowPos2.x-nowPos1.x)<100) {
-                    scaleX = transform.xScale;
-                }
-                // scaleY = transform.yScale;
-                // scaleX = transform.xScale;
+                zoomY.isDrag=Math.abs(e.touches[0].clientY-e.touches[1].clientY)>100;
+                zoomY.transform={...transform}
+                zoomY.sPos=[e.touches[0].clientY,e.touches[1].clientY];
+                zoomY.mPos=[e.touches[0].clientY,e.touches[1].clientY];
 
-                const x1=-nowPos1.x+scaleX/prevTransform.xScale*(gesture2.start1.x+prevTransform.x);
-                const x2=-nowPos2.x+scaleX/prevTransform.xScale*(gesture2.start2.x+prevTransform.x);
-                const y1=-nowPos1.y+scaleY/prevTransform.yScale*(gesture2.start1.y+prevTransform.y);
-                const y2=-nowPos2.y+scaleY/prevTransform.yScale*(gesture2.start2.y+prevTransform.y);
-                let x=(x1+x2)/2;
-                let y=(y1+y2)/2;
-                ref.current?.scrollTo(x,y);
-                console.log(x,y,transform.x,transform.y);
-                gesture2.isXDrag=Math.abs(e.touches[0].clientX-e.touches[1].clientX)>100;
-                gesture2.isYDrag=Math.abs(e.touches[0].clientY-e.touches[1].clientY)>100;
-                gesture2.moving1= nowPos1;
-                gesture2.moving2= nowPos2;
 
-                transform.xScale=scaleX;
-                transform.yScale=scaleY;
-                transform.x=x;
-                transform.y=y;
-                document.getElementById("dummy")!.style.width=24*3600*transform.xScale+"px";
-                document.getElementById("dummy")!.style.height=diaRect.yEnd*transform.yScale+"px";
 
-                    gesture2.isAction=false;
-                requestAnimationFrame(()=>render(new DiagramTransformC(transform.x/transform.xScale,(transform.y)/transform.yScale,transform.xScale,transform.yScale,SCALE)));
-         }
-        });
-        ref.current.addEventListener('touchend',(e)=>{
-            if(e.touches.length>=2){
                 e.preventDefault();
             }
-        });
-    }, []);
+        };
+        const onTouchMove=(e:TouchEvent)=>{
+            if(e.touches.length>=2) {
+                e.preventDefault();
+                requestAnimationFrame(() => {
+                    const nowPos1 = {x: e.touches[0].clientX, y: e.touches[0].clientY};
+                    const nowPos2 = {x: e.touches[1].clientX, y: e.touches[1].clientY};
+                    if(zoomX.isDrag){
+                        if (Math.abs(nowPos2.x - nowPos1.x) >= 100) {
+                            const prevTransform = zoomX.transform;
+                            let scaleX = Math.abs(prevTransform.xScale * (nowPos1.x - nowPos2.x) / (zoomX.sPos[0] - zoomX.sPos[1]));
+                            let x = (prevTransform.xScale / scaleX) * (prevTransform.x + (zoomX.sPos[0] + zoomX.sPos[1]) / 2);
+                            transform.xScale = scaleX;
+                            transform.x = x;
+                        }
+                    }else{
+                        if(Math.abs(e.touches[0].clientX-e.touches[1].clientX)>100){
+                            zoomX.isDrag=true;
+                            zoomX.transform={...transform}
+                            zoomX.sPos=[e.touches[0].clientX,e.touches[1].clientX];
+                            zoomX.mPos=[e.touches[0].clientX,e.touches[1].clientX];
+                        }
+                    }
+                    if(zoomY.isDrag){
+                        if (Math.abs(nowPos2.y - nowPos1.y) >= 100) {
+                            const prevTransform = zoomY.transform;
+                            let scaleY = Math.abs(prevTransform.yScale * (nowPos1.y - nowPos2.y) / (zoomY.sPos[0] - zoomY.sPos[1]));
+                            let y = (prevTransform.yScale / scaleY) * (prevTransform.y + (zoomY.sPos[0] + zoomY.sPos[1]) / 2);
+                            transform.yScale = scaleY;
+                            transform.y = y;
+                        }
+                    }else{
+                        if(Math.abs(e.touches[0].clientY-e.touches[1].clientY)>100){
+                            zoomY.isDrag=true;
+                            zoomY.transform={...transform}
+                            zoomY.sPos=[e.touches[0].clientY,e.touches[1].clientY];
+                            zoomY.mPos=[e.touches[0].clientY,e.touches[1].clientY];
+                        }
+                    }
+
+                    const x1 = -nowPos1.x + transform.xScale / zoomX.transform.xScale * (zoomX.sPos[0] + zoomX.transform.x);
+                    const x2 = -nowPos2.x + transform.xScale / zoomX.transform.xScale * (zoomX.sPos[1] + zoomX.transform.x);
+                    const y1 = -nowPos1.y + transform.yScale / zoomY.transform.yScale * (zoomY.sPos[0] + zoomY.transform.y);
+                    const y2 = -nowPos2.y + transform.yScale / zoomY.transform.yScale * (zoomY.sPos[1] + zoomY.transform.y);
+                    let x = (x1 + x2) / 2;
+                    let y = (y1 + y2) / 2;
+                    ref.current?.scrollTo(x, y);
+                    console.log(x, y, transform.x, transform.y);
+
+                    transform.x = x;
+                    transform.y = y;
+                    document.getElementById("dummy")!.style.width = (24 * 3600 * transform.xScale+80) + "px";
+                    console.log(diaRect.yEnd);
+                    document.getElementById("dummy")!.style.height = diaRect.yEnd * transform.yScale + "px";
+
+                    requestAnimationFrame(()=>render(new DiagramTransformC(transform.x,transform.y,transform.xScale,transform.yScale,SCALE)));
+
+                });
+            }
+        };
+
+        ref.current.addEventListener('touchstart',onTouchStart);
+
+        ref.current.addEventListener('touchmove',onTouchMove);
+
+        return () => {
+            ref.current?.removeEventListener('touchstart',onTouchStart);
+
+            ref.current?.removeEventListener('touchmove',onTouchMove);
+        };
+    }, [diaRect]);
     useEffect(() => {
         if(!ref.current){
             return;
@@ -333,7 +323,7 @@ function DiagramPage() {
 
 
 
-
+console.log(transform.xScale);
     return (
         <div ref={ref}
              style={{position: 'relative', height: '100%', overflowX: "auto", overflowY: "auto"}}
@@ -343,7 +333,7 @@ function DiagramPage() {
             >
             </canvas>
             <div id="dummy" style={{
-                width: 24 * 3600 * transform.xScale,
+                width: (24 * 3600) * transform.xScale+80,
                 height: transform.yScale * diaRect.yEnd
             }}>
 
@@ -384,8 +374,9 @@ interface DiagramTransform{
 
 interface Gesture{
     isDrag:boolean;
-    start1:Point;
-    moving:Point;
+    sPos:number[];
+    mPos:number[];
+    transform:DiagramTransform;
 }
 interface Gesture2{
     isAction:boolean;

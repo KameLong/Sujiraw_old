@@ -147,7 +147,7 @@ export function TimeTablePDF() {
                                    return {...layout, marginLeft: left}
                                });
                            }}></TextField>
-                <TextField label={"余白(ページ間)"}sx={{m:2}} value={layout.pageMargin}
+                <TextField label={"余白(ページ間)"} sx={{m:2}} value={layout.pageMargin}
                            onChange={(e)=>{
                                setLayout(()=> {
                                    let margin= parseInt(e.target.value);
