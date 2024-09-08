@@ -23,7 +23,7 @@ jobs:
       - name: Sync files
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
-            server: ${{ secrets.FTP_SERVER }}:22
+            server: sujirow.kamelong.com:22
             username: ${{ secrets.FTP_USERNAME }}
             password: ${{ secrets.FTP_PASSWORD }}
             server-dir: ${{ secrets.FTP_SERVER_DIR }}
