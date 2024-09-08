@@ -13,7 +13,7 @@ const fontSize=10;
 
 const transform:DiagramTransform={
     x:0,
-    y:-fontSize*3,
+    y:0,
     xScale:0.1,
     yScale:0.4
 }
@@ -32,9 +32,6 @@ const zoomY:Gesture={
     transform:transform
 }
 
-
-
-
 function DiagramPage() {
     const params = useParams<{ routeID: string }>();
     const routeID = Number.parseInt(params.routeID??"0");
@@ -45,14 +42,12 @@ function DiagramPage() {
     const [routeInfo, setRouteInfo] = useState<{[key:number]:RouteInfo}>({});
     const [routes, setRoutes] = useState<{[key:number]:Route}>({});
     const SCALE:number=window.devicePixelRatio;
-    //const SCALE:number=1;
-    console.log(SCALE);
 
-    function Ypos(transform:DiagramTransform,diagramRect:DiagramRect){
+    function Ypos(diagramRect:DiagramRect){
         const windowHeight=window.innerHeight*SCALE;
         const newY=Math.min(transform.y,-(windowHeight-50)/transform.yScale/SCALE+diagramRect.yEnd);
-        if(newY<-fontSize*2/transform.yScale){
-            return -fontSize*2/transform.yScale;
+        if(newY<0){
+            return 0;
         }
         return newY;
 
@@ -120,16 +115,7 @@ function DiagramPage() {
             }
         })
     }, [routes]);
-    function color2Number(color:string):number{
-        switch (color.length){
-            case 7:
-                return Number.parseInt(color.slice(1),16);
-            case 4:
-                return color2Number("#"+color[1]+color[1]+color[2]+color[2]+color[3]+color[3]);
-        }
-        return 0;
 
-    }
 
     const makeDiagramLine=(trips:DiagramTrip[]):DiagramLine[]=>{
         const diagramLines:DiagramLine[]=[];
@@ -169,6 +155,7 @@ function DiagramPage() {
         xStart:3600*3,
         xEnd:3600*27
     });
+
     useEffect(()=>{
         setDownLines(makeDiagramLine(downTrips));
     },[downTrips])
@@ -176,11 +163,8 @@ function DiagramPage() {
         setUpLines(makeDiagramLine(upTrips));
     },[upTrips])
 
-
-
-
     useEffect(() => {
-        const canvas=(document.getElementById("test") as  HTMLCanvasElement);
+        const canvas=(document.getElementById("canvas") as  HTMLCanvasElement);
         if(canvas===null||canvas===undefined){
             return;
         }
@@ -191,34 +175,32 @@ function DiagramPage() {
             return;
         }
         diagramCanvas.transform=new DiagramTransformC(transform.x,transform.y,transform.xScale,transform.yScale,SCALE);
-        diagramCanvas.diaRect=diaRect;
         console.log("diagramCanvas");
         setDiagramCanvas(diagramCanvas);
-    }, [diaRect,]);
+    }, []);
 
     useEffect(() => {
-        // render(true);
-    }, [downLines,upLines]);
+        diagramCanvas.diaRect=diaRect;
+        requestAnimationFrame(()=>render(new DiagramTransformC(transform.x,transform.y,transform.xScale,transform.yScale,SCALE)));
+    }, [diagramCanvas,diaRect]);
+
 
     const render = useCallback(
         (transform:DiagramTransformC) => {
-        diagramCanvas.Clear();
-        diagramCanvas.transform=transform;
-        diagramCanvas.DrawVerticalAxis(4);
-        diagramCanvas.DrawStationAxis(routeStations);
-         diagramCanvas.DrawTrips(downLines);
-         diagramCanvas.DrawTrips(upLines);
-        diagramCanvas.DrawTimeHeader(4);
-         diagramCanvas.DrawStations(routeStations);
-        }, [diagramCanvas]
+            diagramCanvas.Clear();
+            diagramCanvas.transform=transform;
+            diagramCanvas.DrawVerticalAxis(4);
+            diagramCanvas.DrawStationAxis(routeStations);
+            diagramCanvas.DrawTrips(downLines);
+            diagramCanvas.DrawTrips(upLines);
+            diagramCanvas.DrawTimeHeader(4);
+            diagramCanvas.DrawStations(routeStations);
+        }, [diagramCanvas,downLines,upLines,routeStations]
     );
 
     const ref=useRef<HTMLDivElement | null>(null);
     useEffect(() => {
-        if(ref.current===null){
-            return;
-            }
-        const onTouchStart=(e:TouchEvent)=>{
+        const onTouchStart=(e:TouchEvent):void=>{
             if(e.touches.length>=2){
                 zoomX.isDrag=Math.abs(e.touches[0].clientX-e.touches[1].clientX)>100;
                 zoomX.transform={...transform}
@@ -229,9 +211,6 @@ function DiagramPage() {
                 zoomY.transform={...transform}
                 zoomY.sPos=[e.touches[0].clientY,e.touches[1].clientY];
                 zoomY.mPos=[e.touches[0].clientY,e.touches[1].clientY];
-
-
-
                 e.preventDefault();
             }
         };
@@ -280,13 +259,13 @@ function DiagramPage() {
                     const y2 = -nowPos2.y + transform.yScale / zoomY.transform.yScale * (zoomY.sPos[1] + zoomY.transform.y);
                     let x = (x1 + x2) / 2;
                     let y = (y1 + y2) / 2;
-                    ref.current?.scrollTo(x, y);
-                    console.log(x, y, transform.x, transform.y);
-
                     transform.x = x;
                     transform.y = y;
+
+                    transform.y=Ypos(diaRect);
+                    ref.current?.scrollTo(transform.x, transform.y);
+
                     document.getElementById("dummy")!.style.width = (24 * 3600 * transform.xScale+80) + "px";
-                    console.log(diaRect.yEnd);
                     document.getElementById("dummy")!.style.height = diaRect.yEnd * transform.yScale + "px";
 
                     requestAnimationFrame(()=>render(new DiagramTransformC(transform.x,transform.y,transform.xScale,transform.yScale,SCALE)));
@@ -295,16 +274,28 @@ function DiagramPage() {
             }
         };
 
-        ref.current.addEventListener('touchstart',onTouchStart);
-
-        ref.current.addEventListener('touchmove',onTouchMove);
-
+        ref.current?.addEventListener('touchstart',onTouchStart);
+        ref.current?.addEventListener('touchmove',onTouchMove);
         return () => {
             ref.current?.removeEventListener('touchstart',onTouchStart);
-
             ref.current?.removeEventListener('touchmove',onTouchMove);
         };
     }, [diaRect]);
+    useEffect(() => {
+        const resizeEvent=()=>{
+            const canvas=(document.getElementById("canvas") as  HTMLCanvasElement);
+            if(canvas===null||canvas===undefined){
+                return;
+            }
+            canvas.width=canvas.clientWidth*SCALE;
+            canvas.height=canvas.clientHeight*SCALE;
+            requestAnimationFrame(()=>render(new DiagramTransformC(transform.x,transform.y,transform.xScale,transform.yScale,SCALE)));
+        }
+        window.addEventListener('resize', resizeEvent);
+        return ()=>{
+            window.removeEventListener('resize',resizeEvent);
+        }
+    }, [render]);
     useEffect(() => {
         if(!ref.current){
             return;
@@ -314,8 +305,9 @@ function DiagramPage() {
             transform.x=(target.scrollLeft);
             transform.y=(target.scrollTop);
            requestAnimationFrame(()=>render(new DiagramTransformC(transform.x,transform.y,transform.xScale,transform.yScale,SCALE)));
-            console.log(target.scrollLeft,target.scrollTop);
         }
+        requestAnimationFrame(()=>render(new DiagramTransformC(transform.x,transform.y,transform.xScale,transform.yScale,SCALE)));
+
 
     }, [render]);
 
@@ -329,7 +321,7 @@ console.log(transform.xScale);
              style={{position: 'relative', height: '100%', overflowX: "auto", overflowY: "auto"}}
         >
             <canvas
-                id="test" style={{position: 'fixed',pointerEvents: 'none', width: '100%', height: '100%', overflowY: 'hidden'}}
+                id="canvas" style={{position: 'fixed',pointerEvents: 'none', width: '100%', height: '100%', overflowY: 'hidden'}}
             >
             </canvas>
             <div id="dummy" style={{

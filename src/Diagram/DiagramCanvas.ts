@@ -40,8 +40,6 @@ export class DiagramCanvas{
     public diaRect:{xStart:number,yStart:number,xEnd:number,yEnd:number}={xStart:0,yStart:0,xEnd:0,yEnd:0};
 
     public fontSize:number=12;
-
-
     constructor(canvas:HTMLCanvasElement|undefined){
         if(canvas===undefined){
 
@@ -81,6 +79,7 @@ export class DiagramCanvas{
     }
     DrawText(text:string,x:number,y:number) {
         if(this.ctx===undefined){
+            console.log(this.ctx);
             return;
         }
         this.ctx.font = `${this.fontSize*this.transform.SCALE}px sans-serif`;
@@ -88,6 +87,7 @@ export class DiagramCanvas{
     }
     DrawText_(text:string,x:number,y:number) {
         if(this.ctx===undefined){
+            console.log(this.ctx);
             return;
         }
         this.ctx.font = `${this.fontSize*this.transform.SCALE}px sans-serif`;
@@ -96,6 +96,7 @@ export class DiagramCanvas{
 
     DrawTimeHeader(verticalAxis:number){
         if(this.ctx===undefined){
+            console.log(this.ctx);
             return;
         }
         this.ctx.clearRect(0,0,86400*this.transform.SCALE*this.transform.xScale,1.8*this.fontSize*this.transform.SCALE);
@@ -256,12 +257,14 @@ export class DiagramCanvas{
     }
     DrawTrips(trips:DiagramLine[]){
         if(this.ctx===undefined){
+            console.log(this.ctx);
             return;
         }
         trips.forEach(item=>{
             if(item.points.length<2){
                 return;
             }
+
             if(this.ctx===undefined){
                 return;
             }
@@ -283,6 +286,7 @@ export class DiagramCanvas{
     }
     DrawStations(routeStations:DiagramStation[]){
         if(this.ctx===undefined){
+            console.log(this.ctx);
             return;
         }
         const stationViewWidth=80*this.transform.SCALE;
@@ -291,8 +295,8 @@ export class DiagramCanvas{
         this.ctx.rect(0, this.transform.getCanvasY(this.diaRect.yStart-600), stationViewWidth, this.transform.getCanvasY(this.diaRect.yEnd+600));
         this.ctx.fill();
         this.ctx.beginPath();
-        this.ctx.strokeStyle = "#808080";
-        this.ctx.lineWidth = 4;
+        this.ctx.strokeStyle = "#303030";
+        this.ctx.lineWidth =2;
         this.ctx.moveTo(stationViewWidth, this.transform.getCanvasY(this.diaRect.yStart));
         this.ctx.lineTo(stationViewWidth, this.transform.getCanvasY(this.diaRect.yEnd));
         this.ctx.stroke();
