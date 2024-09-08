@@ -1,4 +1,4 @@
-import {memo, ReactElement, useEffect, useMemo, useRef, useState} from "react";
+import {ReactElement, useEffect, useRef, useState} from "react";
 
 interface BoxListProps {
     itemCount:number;
@@ -15,7 +15,6 @@ export function HolizontalBoxList({children,itemCount,itemSize,onScroll,getSetSc
     useEffect(() => {
         if (ref.current) {
             ref.current.onresize = (e) => {
-                console.log(e);
                 setScrollX(ref.current?.scrollLeft??0);
             }
             ref.current.onscroll = (e) => {
