@@ -20,11 +20,11 @@ jobs:
           npm install
           npm run build
 
-        # - name: 📂 Sync files
-        #   uses: SamKirkland/FTP-Deploy-Action@v4.3.4
-        #   with:
-        #     server: ${{ secrets.FTP_SERVER }}
-        #     username: ${{ secrets.FTP_USERNAME }}
-        #     password: ${{ secrets.FTP_PASSWORD }}
-        #     server-dir: ${{ secrets.FTP_SERVER_DIR }}
-        #     local-dir: ./dist/ # ご自身の環境に合わせてください
+      - name: Sync files
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+            server: ${{ secrets.FTP_SERVER }}
+            username: ${{ secrets.FTP_USERNAME }}
+            password: ${{ secrets.FTP_PASSWORD }}
+            server-dir: ${{ secrets.FTP_SERVER_DIR }}
+            local-dir: ./build/ # ご自身の環境に合わせてください
