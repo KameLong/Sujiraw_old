@@ -27,7 +27,7 @@ jobs:
             server: 'sujiro.kamelong.com'
             port: '22'
             local_path: './build/*'
-            remote_path: ${{ secrets.FTP_SERVER_DIR }}
+            remote_path: '/www/Sujiro/wwwroot'
             sftp_only: true
             password: ${{ secrets.FTP_PASSWORD }}
             
