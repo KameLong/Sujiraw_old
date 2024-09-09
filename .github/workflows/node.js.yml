@@ -20,11 +20,15 @@ jobs:
           npm install
           npm run build
 
-      - name: Sync files
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      - name: deploy file
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
         with:
-            server: sftp.sujiro.kamelong.com
             username: ${{ secrets.FTP_USERNAME }}
+            server: 'sujiro.kamelong.com'
+            port: '22'
+            local_path: './build/*'
+            remote_path: ${{ secrets.FTP_SERVER_DIR }}
+            sftp_only: true
             password: ${{ secrets.FTP_PASSWORD }}
-            server-dir: ${{ secrets.FTP_SERVER_DIR }}
-            local-dir: ./build/ # ご自身の環境に合わせてください
+            
+
