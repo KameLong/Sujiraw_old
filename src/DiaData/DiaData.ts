@@ -1,6 +1,6 @@
 export async function fetchGzipJson(url: string): Promise<any> {
     const response = await fetch(url);
-    if(true){
+    if(process.env.SUJIRAW_TYPE==='production'){
         //@ts-ignore
         const rstream = response.body.pipeThrough(new DecompressionStream('gzip'));
         // ReadableStream を Response に変換
