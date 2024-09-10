@@ -50,11 +50,7 @@ function DiagramPage() {
             return 0;
         }
         return newY;
-
     }
-
-
-
     async function  loadRoute(id:number):Promise<Route>{
         return await fetchGzipJson(`/route_${id}.json.gz`) as Route;
     }
@@ -266,7 +262,7 @@ function DiagramPage() {
                     ref.current?.scrollTo(transform.x, transform.y);
 
                     document.getElementById("dummy")!.style.width = (24 * 3600 * transform.xScale+80) + "px";
-                    document.getElementById("dummy")!.style.height = diaRect.yEnd * transform.yScale + "px";
+                    document.getElementById("dummy")!.style.height = (diaRect.yEnd * transform.yScale+300) + "px";
 
                     requestAnimationFrame(()=>render(new DiagramTransformC(transform.x,transform.y,transform.xScale,transform.yScale,SCALE)));
 
@@ -326,7 +322,7 @@ console.log(transform.xScale);
             </canvas>
             <div id="dummy" style={{
                 width: (24 * 3600) * transform.xScale+80,
-                height: transform.yScale * diaRect.yEnd
+                height: transform.yScale * diaRect.yEnd+300
             }}>
 
             </div>
@@ -369,16 +365,6 @@ interface Gesture{
     sPos:number[];
     mPos:number[];
     transform:DiagramTransform;
-}
-interface Gesture2{
-    isAction:boolean;
-    isXDrag:boolean;
-    isYDrag:boolean;
-    transform:DiagramTransform;
-    start1:Point;
-    start2:Point;
-    moving1:Point;
-    moving2:Point;
 }
 interface DiagramRect{
     xStart:number;
