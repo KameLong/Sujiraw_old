@@ -107,10 +107,24 @@ function PDFTripView({trip,type,stations,setting,direction}:PDFTripViewProps) {
         >
             <div style={{borderBottom: "1px solid #000"}}></div>
             <div>
-                <Text style={{textAlign: 'center',width:"100%",height: (setting.lineHeight * 0.1) + 'px'}}>　</Text>
+                <Text style={{
+                    textAlign: 'center',
+                    width: "100%",
+                    height: (setting.lineHeight * 0.1) + 'px',
+                    paddingTop: -((setting.lineHeight * 0.1) * 0.15) + 'px',
+                    paddingBottom: -(setting.fontSize * 0.2) + 'px'
+
+                }}> </Text>
             </div>
+            <div style={{borderBottom: "0.5px solid #000"}}></div>
             <div>
-                <Text style={{textAlign: 'center',width:"100%",height: (setting.lineHeight * 0.1) + 'px'}}>{type.shortName.length===0?"　":type.shortName}</Text>
+                <Text style={{
+                    textAlign: 'center',
+                    width: "100%",
+                    height: (setting.lineHeight * 0.1) + 'px',
+                    paddingTop: -((setting.lineHeight * 0.1) * 0.15) + 'px',
+                    paddingBottom: -(setting.fontSize * 0.2) + 'px'
+                }}>{type.shortName.length === 0 ? "　" : type.shortName}</Text>
             </div>
             <div style={{borderBottom: "1px solid #000"}}></div>
 
@@ -125,7 +139,9 @@ function PDFTripView({trip,type,stations,setting,direction}:PDFTripViewProps) {
                                         width: '100%',
                                         height: (setting.lineHeight * 0.1) + 'px',
                                         textAlign: 'center',
-                                        borderBottom: '0.5px solid black'
+                                        borderBottom: '0.5px solid black',
+                                        paddingTop: -((setting.lineHeight * 0.1) * 0.15) + 'px',
+                                        paddingBottom: -(setting.fontSize * 0.2) + 'px'
                                     }}>
                                         {ariTimeStr(time, _i)}
                                     </Text> : null
@@ -136,7 +152,9 @@ function PDFTripView({trip,type,stations,setting,direction}:PDFTripViewProps) {
                                         fontFamily: "DiaPro",
                                         width: '100%',
                                         height: (setting.lineHeight * 0.1) + 'px',
-                                        textAlign: 'center'
+                                        textAlign: 'center',
+                                        paddingTop: -((setting.lineHeight * 0.1) * 0.15) + 'px',
+                                        paddingBottom: -(setting.fontSize * 0.2) + 'px'
                                     }}>
                                         {ariTimeStr(time, _i)}
                                     </Text> : null
@@ -147,7 +165,9 @@ function PDFTripView({trip,type,stations,setting,direction}:PDFTripViewProps) {
                                         fontFamily: "DiaPro",
                                         width: '100%',
                                         height: (setting.lineHeight * 0.1) + 'px',
-                                        textAlign: 'center'
+                                        textAlign: 'center',
+                                        paddingTop: -((setting.lineHeight * 0.1) * 0.15) + 'px',
+                                        paddingBottom: -(setting.fontSize * 0.2) + 'px'
                                     }}>
                                         {depTimeStr(time, _i)}
                                     </Text> : null

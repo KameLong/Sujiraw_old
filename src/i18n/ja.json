@@ -1,0 +1,13 @@
+{
+  "common": {
+    "fontSize": "フォントサイズ"
+  },
+  "timetablePDF":{
+    "tripInParagraph": "1段の列車数",
+    "lineHeight": "1行の高さ(フォントサイズ*倍率)",
+    "paragraphPerPage"  : "1ページの段数",
+    "arrangement": "時刻表の配置",
+    "alternately": "下り/上り交互に配置",
+    "order": "まとめて配置"
+  }
+}
