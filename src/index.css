@@ -68,3 +68,66 @@ code {
   transform: translateY(0);
   transition: transform 1000ms;
 }
+
+
+.arrow_row::before { /* くの字の表示設定 */
+  content: "";
+  margin: auto;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 7px;    /* くの字を山なりに見た時、左側の長さ */
+  height: 7px;   /* くの字を山なりに見た時、右側の長さ */
+  border-top: 1px solid #000;     /* くの字を山なりに見た時、左側の太さと色 */
+  border-right: 1px solid #000;   /* くの字を山なりに見た時、右側の太さと色 */
+  transform: rotate(45deg);    /* くの字の向き */
+}
+.arrow_row::after { /* 棒の表示設定 */
+  content: "";
+  margin: auto;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 7px;    /* くの字を山なりに見た時、左側の長さ */
+  height: 7px;   /* くの字を山なりに見た時、右側の長さ */
+  border-bottom: 1px solid #000;     /* くの字を山なりに見た時、左側の太さと色 */
+  border-left: 1px solid #000;   /* くの字を山なりに見た時、右側の太さと色 */
+  transform: rotate(45deg);    /* くの字の向き */
+}
+
+.arrow_col::before { /* くの字の表示設定 */
+  content: "";
+  margin: auto;
+  position: absolute;
+  bottom: 0;
+  left: -3.5px;
+  right: 0;
+  width: 7px;    /* くの字を山なりに見た時、左側の長さ */
+  height: 7px;   /* くの字を山なりに見た時、右側の長さ */
+  border-bottom: 1px solid #000;     /* くの字を山なりに見た時、左側の太さと色 */
+  border-right: 1px solid #000;   /* くの字を山なりに見た時、右側の太さと色 */
+  transform: rotate(45deg);    /* くの字の向き */
+}
+.arrow_col::after { /* 棒の表示設定 */
+  content: "";
+  margin: auto;
+  position: absolute;
+  top: 0;
+  left: -3.5px;
+  right: 0;
+  width: 7px;    /* くの字を山なりに見た時、左側の長さ */
+  height: 7px;   /* くの字を山なりに見た時、右側の長さ */
+  border-top: 1px solid #000;     /* くの字を山なりに見た時、左側の太さと色 */
+  border-left: 1px solid #000;   /* くの字を山なりに見た時、右側の太さと色 */
+  transform: rotate(45deg);    /* くの字の向き */
+}
+
+.dialog, .dialog-content{
+display: flex !important;
+justify-content: center !important;
+align-items: center !important;
+padding-top: 0px !important;
+transform: initial !important;
+}

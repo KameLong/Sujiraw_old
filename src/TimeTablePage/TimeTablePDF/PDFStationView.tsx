@@ -16,19 +16,32 @@ function PDFStationView({stations,setting,direction}:PDFStationViewProps){
     const showStations=(direction===0)?stations: stations.slice().reverse();
 
     return (
-        <View style={{width:'100%',borderRight:"1px solid black"}}>
+        <View style={{width: '100%', borderRight: "1px solid black"}}>
             <div style={{borderBottom: "1px solid #000"}}></div>
-            <div >
-               <Text style={{paddingLeft:'2px'}}>列車番号</Text>
-            </div>
             <div>
-                <Text style={{paddingLeft:'2px'}}>列車種別</Text>
+                <Text style={{
+                    textAlign: 'center',
+                    width: "100%",
+                    height: (setting.lineHeight * 0.1) + 'px',
+                    paddingTop: -((setting.lineHeight * 0.1) * 0.15) + 'px',
+                    paddingBottom: -(setting.fontSize * 0.2) + 'px'
+                }}>列車番号</Text>
+            </div>
+            <div style={{borderBottom: "0.5px solid #000"}}></div>
+            <div>
+                <Text style={{
+                    textAlign: 'center',
+                    width: "100%",
+                    height: (setting.lineHeight * 0.1) + 'px',
+                    paddingTop: -((setting.lineHeight * 0.1) * 0.15) + 'px',
+                    paddingBottom: -(setting.fontSize * 0.2) + 'px'
+                }}>列車種別</Text>
             </div>
             <div style={{borderBottom: "1px solid #000"}}></div>
 
             {
                 showStations.map((station, _i) => {
-                    switch (stationStyle(station,direction)) {
+                    switch (stationStyle(station, direction)) {
                         case 1:
                         case 2:
                             return (
@@ -36,9 +49,15 @@ function PDFStationView({stations,setting,direction}:PDFStationViewProps){
                                     whiteSpace: 'nowrap',
                                     overflow: "hidden",
                                 }} key={station.rsID}>
-                                    <Text style={{paddingLeft:'2px',height:(setting.lineHeight*0.1)+'px',overflow:'hidden'}}>
-                                       {station.name}
-                                        </Text>
+                                    <Text style={{
+                                        paddingLeft: '2px',
+                                        height: (setting.lineHeight * 0.1) + 'px',
+                                        overflow: 'hidden',
+                                        paddingTop: -((setting.lineHeight * 0.1) * 0.15) + 'px',
+                                        paddingBottom: -(setting.fontSize * 0.2) + 'px'
+                                    }}>
+                                        {station.name}
+                                    </Text>
                                 </div>
                             );
                         case 3:
@@ -47,7 +66,14 @@ function PDFStationView({stations,setting,direction}:PDFStationViewProps){
                                     whiteSpace: 'nowrap',
                                     overflow: "hidden",
                                 }} key={station.rsID}>
-                                    <Text style={{paddingLeft:'2px',verticalAlign:'sub', height:((setting.lineHeight*0.1)*2)+'px',fontSize:(setting.fontSize*0.13)+'pt'}}>{station.name}</Text>
+                                    <Text style={{
+                                        paddingLeft: '2px',
+                                        verticalAlign: 'sub',
+                                        height: ((setting.lineHeight * 0.1) * 2) + 'px',
+                                        fontSize: (setting.fontSize * 0.13) + 'pt',
+                                        paddingTop: -((setting.lineHeight * 0.1) * 0.15) + 'px',
+                                        paddingBottom: -(setting.fontSize * 0.2) + 'px'
+                                    }}>{station.name}</Text>
                                 </div>
                             );
                     }
@@ -55,7 +81,6 @@ function PDFStationView({stations,setting,direction}:PDFStationViewProps){
             }
             <div style={{borderBottom: "1px solid #000"}}></div>
         </View>
-
     );
 }
 
