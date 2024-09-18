@@ -5,12 +5,13 @@ import {GetStopTime, StopTime, TrainType, Trip} from "../../DiaData/DiaData";
 import {StationProps} from "../StationView";
 import {TimeTablePageSetting} from "../TimeTablePage";
 import {timeIntStr} from "../Util";
-import {PDFTimeTableLayout} from "./TimeTablePDF";
+import { TimetablePDFSetting} from "./SettingView";
+
 interface PDFTripViewProps {
     trip: Trip;
     type: TrainType;
     stations: StationProps[];
-    setting: PDFTimeTableLayout;
+    setting: TimetablePDFSetting;
     direction: number;
 }
 function PDFTripView({trip,type,stations,setting,direction}:PDFTripViewProps) {
@@ -95,12 +96,16 @@ function PDFTripView({trip,type,stations,setting,direction}:PDFTripViewProps) {
             return trip.times.slice().reverse();
         }
     }
+
+    const lineHeight=(setting.lineHeight*setting.fontSize)+'px';
+    const linePaddingTop=-(setting.lineHeight*setting.fontSize*0.15)+'px';
+    const linePaddingBottom=-(setting.fontSize*2)+'px';
     return (
 
         <View
             style={{
                 color: type.color,
-                width: setting.trainWidth + 'mm',
+                width: ((210-setting.leftPadding-setting.rightPadding-setting.stationNameWidth-1)/setting.tripInParagraph) + 'mm',
                 borderRight: '0.5px solid #000',
                 textAlign: 'center'
             }}
@@ -110,9 +115,9 @@ function PDFTripView({trip,type,stations,setting,direction}:PDFTripViewProps) {
                 <Text style={{
                     textAlign: 'center',
                     width: "100%",
-                    height: (setting.lineHeight * 0.1) + 'px',
-                    paddingTop: -((setting.lineHeight * 0.1) * 0.15) + 'px',
-                    paddingBottom: -(setting.fontSize * 0.2) + 'px'
+                    height: lineHeight,
+                    paddingTop: linePaddingTop,
+                    paddingBottom: linePaddingBottom
 
                 }}> </Text>
             </div>
@@ -121,9 +126,9 @@ function PDFTripView({trip,type,stations,setting,direction}:PDFTripViewProps) {
                 <Text style={{
                     textAlign: 'center',
                     width: "100%",
-                    height: (setting.lineHeight * 0.1) + 'px',
-                    paddingTop: -((setting.lineHeight * 0.1) * 0.15) + 'px',
-                    paddingBottom: -(setting.fontSize * 0.2) + 'px'
+                    height: lineHeight,
+                    paddingTop: linePaddingTop,
+                    paddingBottom: linePaddingBottom
                 }}>{type.shortName.length === 0 ? "　" : type.shortName}</Text>
             </div>
             <div style={{borderBottom: "1px solid #000"}}></div>
@@ -137,11 +142,11 @@ function PDFTripView({trip,type,stations,setting,direction}:PDFTripViewProps) {
                                     <Text style={{
                                         fontFamily: "DiaPro",
                                         width: '100%',
-                                        height: (setting.lineHeight * 0.1) + 'px',
                                         textAlign: 'center',
                                         borderBottom: '0.5px solid black',
-                                        paddingTop: -((setting.lineHeight * 0.1) * 0.15) + 'px',
-                                        paddingBottom: -(setting.fontSize * 0.2) + 'px'
+                                        height: lineHeight,
+                                        paddingTop: linePaddingTop,
+                                        paddingBottom: linePaddingBottom
                                     }}>
                                         {ariTimeStr(time, _i)}
                                     </Text> : null
@@ -151,10 +156,11 @@ function PDFTripView({trip,type,stations,setting,direction}:PDFTripViewProps) {
                                     <Text style={{
                                         fontFamily: "DiaPro",
                                         width: '100%',
-                                        height: (setting.lineHeight * 0.1) + 'px',
                                         textAlign: 'center',
-                                        paddingTop: -((setting.lineHeight * 0.1) * 0.15) + 'px',
-                                        paddingBottom: -(setting.fontSize * 0.2) + 'px'
+                                        height: lineHeight,
+                                        paddingTop: linePaddingTop,
+                                        paddingBottom: linePaddingBottom
+
                                     }}>
                                         {ariTimeStr(time, _i)}
                                     </Text> : null
@@ -164,10 +170,11 @@ function PDFTripView({trip,type,stations,setting,direction}:PDFTripViewProps) {
                                     <Text style={{
                                         fontFamily: "DiaPro",
                                         width: '100%',
-                                        height: (setting.lineHeight * 0.1) + 'px',
                                         textAlign: 'center',
-                                        paddingTop: -((setting.lineHeight * 0.1) * 0.15) + 'px',
-                                        paddingBottom: -(setting.fontSize * 0.2) + 'px'
+                                        height: lineHeight,
+                                        paddingTop: linePaddingTop,
+                                        paddingBottom: linePaddingBottom
+
                                     }}>
                                         {depTimeStr(time, _i)}
                                     </Text> : null

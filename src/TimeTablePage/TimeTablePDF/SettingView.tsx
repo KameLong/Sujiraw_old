@@ -18,28 +18,8 @@ import {Controller, Form, SubmitHandler, useForm} from "react-hook-form";
 
 
 
-// function useTimeTableSettingState() {
-//     const [fontSize, setFontSize] = useState("10");
-//     const [tripCountOfParagraph, setTripCountOfParagraph] = useState("10");
-//     const [lineHeightRatio, setLineHeightRatio] = useState("10");
-//     const [arrangement, setArrangement] = useState("alternately");
-//
-//     return {
-//         fontSize,
-//         setFontSize,
-//         tripCountOfParagraph,
-//         setTripCountOfParagraph,
-//         lineHeightRatio,
-//         setLineHeightRatio,
-//         arrangement,
-//         setArrangement
-//     }
-//
-// }
 
-
-
-type TimetablePDFSetting = {
+export type TimetablePDFSetting = {
     fontSize: number,
     tripInParagraph:number,
     lineHeight:number,
@@ -53,8 +33,12 @@ type TimetablePDFSetting = {
 }
 
 
+export interface TimeTablePDFSettingProps {
+    layout: TimetablePDFSetting;
+    setLayout: (layout: TimetablePDFSetting) => void;
+}
 
-export function SettingView(){
+export function SettingView({layout,setLayout}:TimeTablePDFSettingProps){
     const {t, i18n} = useTranslation();
     const {
         control,
@@ -62,20 +46,7 @@ export function SettingView(){
         register,
         formState: { errors }
     } = useForm<TimetablePDFSetting>({
-        defaultValues: {
-            fontSize: 12,
-            tripInParagraph: 10,
-            lineHeight:1.4,
-            orderType:1,
-            paragraphPerPage:10,
-            topPadding:10,
-            leftPadding:10,
-            rightPadding:10,
-            paragraphPadding:10,
-            stationNameWidth:10
-
-
-        }
+        defaultValues: layout
     })
 
     const validationRules = {
@@ -121,7 +92,8 @@ export function SettingView(){
 
     const onSubmit: SubmitHandler<TimetablePDFSetting> = (data: TimetablePDFSetting) => {
         //stateに保存する
-        console.log(data)
+        setLayout(data);
+
     }
     return (
         <Stack component="form" noValidate

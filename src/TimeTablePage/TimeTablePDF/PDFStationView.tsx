@@ -4,16 +4,21 @@ import {Text, View} from "@react-pdf/renderer";
 import {TimeTablePageSetting} from "../TimeTablePage";
 import {StationProps} from "../StationView";
 import {stationStyle} from "../Util";
-import {PDFTimeTableLayout} from "./TimeTablePDF";
+import { TimetablePDFSetting} from "./SettingView";
 
 interface PDFStationViewProps {
     stations: StationProps[];
-    setting: PDFTimeTableLayout;
+    setting: TimetablePDFSetting;
     direction: number;
 }
 
 function PDFStationView({stations,setting,direction}:PDFStationViewProps){
     const showStations=(direction===0)?stations: stations.slice().reverse();
+
+    const lineHeight=(setting.lineHeight*setting.fontSize)+'px';
+    const linePaddingTop=-(setting.lineHeight*setting.fontSize*0.15)+'px';
+    const linePaddingBottom=-(setting.fontSize*2)+'px';
+
 
     return (
         <View style={{width: '100%', borderRight: "1px solid black"}}>
@@ -22,9 +27,9 @@ function PDFStationView({stations,setting,direction}:PDFStationViewProps){
                 <Text style={{
                     textAlign: 'center',
                     width: "100%",
-                    height: (setting.lineHeight * 0.1) + 'px',
-                    paddingTop: -((setting.lineHeight * 0.1) * 0.15) + 'px',
-                    paddingBottom: -(setting.fontSize * 0.2) + 'px'
+                    height: lineHeight,
+                    paddingTop: linePaddingTop,
+                    paddingBottom: linePaddingBottom
                 }}>列車番号</Text>
             </div>
             <div style={{borderBottom: "0.5px solid #000"}}></div>
@@ -32,9 +37,9 @@ function PDFStationView({stations,setting,direction}:PDFStationViewProps){
                 <Text style={{
                     textAlign: 'center',
                     width: "100%",
-                    height: (setting.lineHeight * 0.1) + 'px',
-                    paddingTop: -((setting.lineHeight * 0.1) * 0.15) + 'px',
-                    paddingBottom: -(setting.fontSize * 0.2) + 'px'
+                    height: lineHeight,
+                    paddingTop: linePaddingTop,
+                    paddingBottom: linePaddingBottom
                 }}>列車種別</Text>
             </div>
             <div style={{borderBottom: "1px solid #000"}}></div>
@@ -51,10 +56,10 @@ function PDFStationView({stations,setting,direction}:PDFStationViewProps){
                                 }} key={station.rsID}>
                                     <Text style={{
                                         paddingLeft: '2px',
-                                        height: (setting.lineHeight * 0.1) + 'px',
                                         overflow: 'hidden',
-                                        paddingTop: -((setting.lineHeight * 0.1) * 0.15) + 'px',
-                                        paddingBottom: -(setting.fontSize * 0.2) + 'px'
+                                        height: lineHeight,
+                                        paddingTop: linePaddingTop,
+                                        paddingBottom: linePaddingBottom
                                     }}>
                                         {station.name}
                                     </Text>
@@ -69,10 +74,10 @@ function PDFStationView({stations,setting,direction}:PDFStationViewProps){
                                     <Text style={{
                                         paddingLeft: '2px',
                                         verticalAlign: 'sub',
-                                        height: ((setting.lineHeight * 0.1) * 2) + 'px',
-                                        fontSize: (setting.fontSize * 0.13) + 'pt',
-                                        paddingTop: -((setting.lineHeight * 0.1) * 0.15) + 'px',
-                                        paddingBottom: -(setting.fontSize * 0.2) + 'px'
+                                        height: (setting.lineHeight*setting.fontSize*2)+'px',
+                                        paddingTop: (setting.lineHeight*setting.fontSize*0.1)+'px',
+                                        paddingBottom: linePaddingBottom,
+
                                     }}>{station.name}</Text>
                                 </div>
                             );
