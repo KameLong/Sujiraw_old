@@ -10,7 +10,7 @@ import { styled } from '@mui/system';
 import {Settings} from "@mui/icons-material";
 import Box from "@mui/material/Box";
 import {EditRoute, loadCompany, loadRoute, Route, RouteInfo, Station, Train, TrainType} from "../../DiaData/DiaData";
-import { SettingView} from "./SettingView";
+import {SettingView, TimetablePDFSetting} from "./SettingView";
 
 const CustomDialog = styled(Dialog)({
     '& .MuiDialog-paper': {
@@ -71,16 +71,19 @@ export function TimeTablePDF() {
 
 
 
-    const [layout,setLayout]=useState<PDFTimeTableLayout>({
-        marginTop:30,
-        marginLeft:5,
-        pageMargin:20,
-        stationWidth:20,
-        trainPerPage:30,
+    const [layout,setLayout]=useState<TimetablePDFSetting>({
+        tripInParagraph:20,
+        paragraphPerPage:1,
+        orderType:0,
+        topPadding:30,
+        leftPadding:20,
+        rightPadding:20,
+        paragraphPadding:20,
+        stationNameWidth:30,
 
-        fontSize:70,
-        trainWidth:6,
-        lineHeight:80
+        fontSize:10,
+        lineHeight:1.2,
+
     });
 
 
@@ -93,7 +96,7 @@ export function TimeTablePDF() {
             return  [...Array(1)].map((_, i) => i)
         }
          return  [...Array(1)].map((_, i) => i)
-       return  [...Array(Math.ceil(tripnum/layout.trainPerPage))].map((_, i) => i)
+       return  [...Array(Math.ceil(tripnum/layout.tripInParagraph))].map((_, i) => i)
     }
 
 
@@ -119,7 +122,7 @@ export function TimeTablePDF() {
     });
     const styles = StyleSheet.create({
         tableCell: {
-            fontSize: (layout.fontSize*0.1)+'pt',
+            fontSize: (layout.fontSize)+'pt',
             fontFamily: "NotoSansJP",
         },
     });
@@ -142,7 +145,11 @@ export function TimeTablePDF() {
                     maxWidth="lg"
             >
 
-                <SettingView ></SettingView>
+                <SettingView layout={layout}
+                setLayout={(data=>{
+                    setLayout(data);
+                    setSettingOpen(false);
+                })}></SettingView>
             </CustomDialog>
             <PDFViewer style={{height:'calc(100% - 10px)',width:'100%'}}>
                 <Document>
@@ -152,15 +159,17 @@ export function TimeTablePDF() {
                                 <Page size="A4" style={styles.tableCell} key={i}>
 
                                     <View wrap={false} style={{
-                                        marginTop:layout.marginTop+'mm',
-                                        marginLeft:layout.marginLeft+'mm',
-                                        display:"flex",flexDirection: "row",width:`${layout.trainWidth*layout.trainPerPage+layout.stationWidth}mm`}}>
+                                        marginTop:layout.topPadding+'mm',
+                                        marginLeft:layout.leftPadding+'mm',
+                                        marginRight:layout.rightPadding+'mm',
+                                        display:"flex",flexDirection: "row"
+                                    }}>
                                         <View style={{alignItems:'stretch',borderLeft:"1px solid black"}}/>
-                                        <div style={{width:layout.stationWidth+'mm'}}>
+                                        <div style={{width:layout.stationNameWidth+'mm'}}>
                                             <PDFStationView   stations={getStationProps()} direction={0} setting={layout}/>
                                         </div>
                                             <View style={{display:"flex",flexDirection: "row"}}>
-                                                {route.downTrips.slice(page*layout.trainPerPage,(page+1)*layout.trainPerPage).map((trip) => {
+                                                {route.downTrips.slice(page*layout.tripInParagraph,(page+1)*layout.tripInParagraph).map((trip) => {
                                                     return (
                                                         <PDFTripView  key={trip.tripID} trip={trip} stations={getStationProps()}
                                                                       direction={0} setting={layout} type={trainTypes[trip.trainTypeID]}
@@ -171,17 +180,18 @@ export function TimeTablePDF() {
                                             </View>
                                     </View>
                                     <View wrap={false} style={{
-                                        marginTop: layout.pageMargin + 'mm',
-                                        marginLeft: layout.marginLeft + 'mm',
+                                        marginTop: layout.paragraphPadding + 'mm',
+                                        marginLeft: layout.leftPadding + 'mm',
+                                        marginRight: layout.rightPadding + 'mm',
                                         display: "flex", flexDirection: "row"
                                     }}>
                                         <View style={{alignItems: 'stretch', borderLeft: "1px solid black"}}/>
-                                        <div style={{width: layout.stationWidth + 'mm'}}>
+                                        <div style={{width: layout.stationNameWidth + 'mm'}}>
                                             <PDFStationView   stations={getStationProps()} direction={1} setting={layout}/>
                                         </div>
                                             <View>
                                                 <View style={{display: "flex", flexDirection: "row"}}>
-                                                    {route.upTrips.slice(page * layout.trainPerPage, (page+1)*layout.trainPerPage).map((trip) => {
+                                                    {route.upTrips.slice(page * layout.tripInParagraph, (page+1)*layout.tripInParagraph).map((trip) => {
                                                         return (
                                                             <PDFTripView   key={trip.tripID} trip={trip}
                                                                          stations={getStationProps()}
@@ -207,17 +217,7 @@ export function TimeTablePDF() {
     );
 }
 
-export interface PDFTimeTableLayout{
-    marginTop:number;
-    marginLeft:number;
-    pageMargin:number;
-    fontSize:number;
-    stationWidth:number;
-    trainWidth:number;
-    trainPerPage:number;
-    lineHeight:number;
 
-}
 
 
 
