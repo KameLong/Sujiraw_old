@@ -16,7 +16,8 @@ function PDFStationView({stations,setting,direction}:PDFStationViewProps){
     const showStations=(direction===0)?stations: stations.slice().reverse();
 
     const lineHeight=(setting.lineHeight*setting.fontSize)+'px';
-    const linePaddingTop=-(setting.lineHeight*setting.fontSize*0.15)+'px';
+    const linePaddingTop=(setting.lineHeight/2-0.7)*setting.fontSize+'px';
+
     const linePaddingBottom=-(setting.fontSize*2)+'px';
 
 
@@ -75,7 +76,7 @@ function PDFStationView({stations,setting,direction}:PDFStationViewProps){
                                         paddingLeft: '2px',
                                         verticalAlign: 'sub',
                                         height: (setting.lineHeight*setting.fontSize*2)+'px',
-                                        paddingTop: (setting.lineHeight*setting.fontSize*0.1)+'px',
+                                        paddingTop: (setting.lineHeight-0.9)*setting.fontSize+'px',
                                         paddingBottom: linePaddingBottom,
 
                                     }}>{station.name}</Text>

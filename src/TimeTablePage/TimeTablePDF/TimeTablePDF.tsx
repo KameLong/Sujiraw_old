@@ -79,7 +79,7 @@ export function TimeTablePDF() {
         leftPadding:20,
         rightPadding:20,
         paragraphPadding:20,
-        stationNameWidth:30,
+        stationNameWidth:20,
 
         fontSize:10,
         lineHeight:1.2,
@@ -91,11 +91,10 @@ export function TimeTablePDF() {
 
     const getPage=()=>{
         const tripnum=Math.max(route.upTrips.length,route.downTrips.length);
-        if(settingOpen){
-
-            return  [...Array(1)].map((_, i) => i)
-        }
-         return  [...Array(1)].map((_, i) => i)
+        // if(settingOpen){
+        //     return  [...Array(1)].map((_, i) => i)
+        // }
+//         return  [...Array(1)].map((_, i) => i)
        return  [...Array(Math.ceil(tripnum/layout.tripInParagraph))].map((_, i) => i)
     }
 
