@@ -98,7 +98,7 @@ function PDFTripView({trip,type,stations,setting,direction}:PDFTripViewProps) {
     }
 
     const lineHeight=(setting.lineHeight*setting.fontSize)+'px';
-    const linePaddingTop=-(setting.lineHeight*setting.fontSize*0.15)+'px';
+    const linePaddingTop=(setting.lineHeight/2-0.7)*setting.fontSize+'px';
     const linePaddingBottom=-(setting.fontSize*2)+'px';
     return (
 

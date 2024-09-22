@@ -17,14 +17,17 @@ import {Controller, Form, SubmitHandler, useForm} from "react-hook-form";
 
 
 
-
+export enum OrderType {
+    ALTERNATELY = "alternately",
+    ORDER = "order"
+}
 
 export type TimetablePDFSetting = {
     fontSize: number,
     tripInParagraph:number,
     lineHeight:number,
     paragraphPerPage:number,
-    orderType:number,
+    orderType:OrderType,
     topPadding:number,
     leftPadding:number,
     rightPadding:number,
@@ -296,21 +299,18 @@ export function SettingView({layout,setLayout}:TimeTablePDFSettingProps){
                             <RadioGroup
                                 name={field.name}
                                 onChange={(e) => {
-                                    const value = parseInt(e.target.value)
-                                    if (!isNaN(value)) {
-                                        field.onChange(value)
-                                    }
+                                        field.onChange(e.target.value);
                                 }}
                                 value={field.value === undefined ? '' : field.value}
                             >
                                 <FormLabel id="demo-radio-buttons-group-label">{t("timetablePDF.arrangement")}</FormLabel>
                                 <FormControlLabel
-                                    value={1}
+                                    value={OrderType.ALTERNATELY}
                                     control={<Radio />}
                                     label={t("timetablePDF.alternately")}
                                 />
                                 <FormControlLabel
-                                    value={2}
+                                    value={OrderType.ORDER}
                                     control={<Radio />}
                                     label={t("timetablePDF.order")}
                                 />
