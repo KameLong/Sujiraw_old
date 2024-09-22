@@ -1,4 +1,4 @@
-import React, { useEffect, useState} from 'react';
+import React, {memo, useCallback, useEffect, useRef, useState} from 'react';
 import {useNavigate, useParams} from "react-router-dom";
 import PDFStationView from "./PDFStationView";
 import PDFTripView from './PDFTripView';
@@ -10,7 +10,10 @@ import { styled } from '@mui/system';
 import {Settings} from "@mui/icons-material";
 import Box from "@mui/material/Box";
 import {EditRoute, loadCompany, loadRoute, Route, RouteInfo, Station, Train, TrainType} from "../../DiaData/DiaData";
-import {SettingView, TimetablePDFSetting} from "./SettingView";
+import {OrderType, SettingView, TimetablePDFSetting} from "./SettingView";
+import {ClipLoader} from "react-spinners";
+import { TimeTablePDF2 } from './TimeTablePDF2';
+import {TimeTablePdfOrder} from "./TimeTablePdfOrder";
 
 const CustomDialog = styled(Dialog)({
     '& .MuiDialog-paper': {
@@ -19,13 +22,15 @@ const CustomDialog = styled(Dialog)({
         margin: '5px',
     },
 });
-
+const TimeTablePDF22=memo(TimeTablePDF2);
+const TimeTablePdfOrder2=memo(TimeTablePdfOrder);
 export function TimeTablePDF() {
     const [stations, setStations] = useState<{[key:number]:Station}>({});
     const [trainTypes, setTrainTypes] = useState<{[key:number]:TrainType}>({});
     const [trains, setTrains] = useState<{[key:number]:Train}>({});
     const [routeInfo, setRouteInfo] = useState<{[key:number]:RouteInfo}>({});
     const [routes, setRoutes] = useState<{[key:number]:Route}>({});
+    const [loading, setLoading] = useState(true);
 
     const navigate=useNavigate();
     const [settingOpen,setSettingOpen]=useState(false);
@@ -34,7 +39,6 @@ export function TimeTablePDF() {
     const routeID=parseInt(param.routeID??"0");
 
 
-    const route=routes[routeID];
 
     useEffect(() => {
         loadCompany().then((company)=>{
@@ -44,6 +48,8 @@ export function TimeTablePDF() {
             setRouteInfo(company.routes);
         });
     }, []);
+    const route=routes[routeID];
+
     useEffect(() => {
         const res=Object.values(routeInfo).find((routeInfo)=>{
             return routeInfo.name==="阪急宝塚本線";
@@ -66,6 +72,10 @@ export function TimeTablePDF() {
 
     }, [routeInfo,routeID]);
 
+    const finishRender=useCallback(()=>{
+        setLoading(false);
+    },[]);
+
 
 
 
@@ -73,59 +83,39 @@ export function TimeTablePDF() {
 
     const [layout,setLayout]=useState<TimetablePDFSetting>({
         tripInParagraph:20,
-        paragraphPerPage:1,
-        orderType:0,
-        topPadding:30,
-        leftPadding:20,
-        rightPadding:20,
-        paragraphPadding:20,
+        paragraphPerPage:2,
+        orderType:OrderType.ALTERNATELY,
+        topPadding:15,
+        leftPadding:10,
+        rightPadding:10,
+        paragraphPadding:5,
         stationNameWidth:20,
-
         fontSize:10,
         lineHeight:1.2,
-
     });
 
 
 
 
-    const getPage=()=>{
-        const tripnum=Math.max(route.upTrips.length,route.downTrips.length);
-        // if(settingOpen){
-        //     return  [...Array(1)].map((_, i) => i)
-        // }
-//         return  [...Array(1)].map((_, i) => i)
-       return  [...Array(Math.ceil(tripnum/layout.tripInParagraph))].map((_, i) => i)
-    }
 
 
-    function getStationProps(){
-        return routes[routeID].routeStations.map((item)=>{
-            return {
-                rsID:item.rsID,
-                name:stations[item.stationID]?.name??"",
-                style:item.showStyle
-            }
-        });
-    }
 
 
-    // ttfファイルのフォント定義
-    Font.register({
-        family: "NotoSansJP",
-        src: "/font/NotoSansJP.ttf",
-    });
-    Font.register({
-        family: "DiaPro",
-        src: "/font/DiaPro-Regular.ttf",
-    });
-    const styles = StyleSheet.create({
-        tableCell: {
-            fontSize: (layout.fontSize)+'pt',
-            fontFamily: "NotoSansJP",
-        },
-    });
-    if(route===undefined){
+
+
+
+
+
+
+
+    useEffect(() => {
+        setLoading(true);
+
+    }, [route,layout,stations,trainTypes ,finishRender]);
+
+
+    if(route===undefined||Object.keys(trainTypes).length===0||Object.keys(stations).length===0){
+        console.log(undefined);
         return <div>loading</div>
     }
 
@@ -150,68 +140,33 @@ export function TimeTablePDF() {
                     setSettingOpen(false);
                 })}></SettingView>
             </CustomDialog>
-            <PDFViewer style={{height:'calc(100% - 10px)',width:'100%'}}>
-                <Document>
-                    {
-                        getPage().map((page,i)=> {
-                            return(
-                                <Page size="A4" style={styles.tableCell} key={i}>
-
-                                    <View wrap={false} style={{
-                                        marginTop:layout.topPadding+'mm',
-                                        marginLeft:layout.leftPadding+'mm',
-                                        marginRight:layout.rightPadding+'mm',
-                                        display:"flex",flexDirection: "row"
-                                    }}>
-                                        <View style={{alignItems:'stretch',borderLeft:"1px solid black"}}/>
-                                        <div style={{width:layout.stationNameWidth+'mm'}}>
-                                            <PDFStationView   stations={getStationProps()} direction={0} setting={layout}/>
-                                        </div>
-                                            <View style={{display:"flex",flexDirection: "row"}}>
-                                                {route.downTrips.slice(page*layout.tripInParagraph,(page+1)*layout.tripInParagraph).map((trip) => {
-                                                    return (
-                                                        <PDFTripView  key={trip.tripID} trip={trip} stations={getStationProps()}
-                                                                      direction={0} setting={layout} type={trainTypes[trip.trainTypeID]}
-                                                        />
-                                                    )
-                                                })}
-                                                <View style={{alignItems:'stretch',borderLeft:"0.5px solid black"}}/>
-                                            </View>
-                                    </View>
-                                    <View wrap={false} style={{
-                                        marginTop: layout.paragraphPadding + 'mm',
-                                        marginLeft: layout.leftPadding + 'mm',
-                                        marginRight: layout.rightPadding + 'mm',
-                                        display: "flex", flexDirection: "row"
-                                    }}>
-                                        <View style={{alignItems: 'stretch', borderLeft: "1px solid black"}}/>
-                                        <div style={{width: layout.stationNameWidth + 'mm'}}>
-                                            <PDFStationView   stations={getStationProps()} direction={1} setting={layout}/>
-                                        </div>
-                                            <View>
-                                                <View style={{display: "flex", flexDirection: "row"}}>
-                                                    {route.upTrips.slice(page * layout.tripInParagraph, (page+1)*layout.tripInParagraph).map((trip) => {
-                                                        return (
-                                                            <PDFTripView   key={trip.tripID} trip={trip}
-                                                                         stations={getStationProps()}
-                                                                           direction={1}
-                                                                           setting={layout}
-                                                                           type={trainTypes[trip.trainTypeID]}
-
-                                                            />
-                                                        )
-                                                    })}
-                                                </View>
-                                            </View>
-                                            <View style={{alignItems: 'stretch', borderLeft: "0.5px solid black"}}/>
-                                    </View>
-                                </Page>
-
-                        )
-                        })
-                    }
-                </Document>
+            <PDFViewer style={{height:'calc(100% - 10px)',width:'100%'}} >
+                {layout.orderType===OrderType.ALTERNATELY?
+                    <TimeTablePDF22 route={route} layout={layout} stations={stations} trainTypes={trainTypes} onRender={finishRender}/>
+                    :
+                    <TimeTablePdfOrder2 route={route} layout={layout} stations={stations} trainTypes={trainTypes} onRender={finishRender}/>
+                }
             </PDFViewer>
+            {loading?
+            <div style={{position:"fixed",height:'100%',
+                width:'100%',top:'0',  display: 'flex',
+                alignItems: 'center',
+            background:'#8888'}}>
+                <div
+                    style={{margin:'0 auto',width:'150px',height:'150px'}}
+                >
+                <ClipLoader
+                    color={"#F00"}
+                    loading={true}
+                    size={150}
+                    aria-label="Loading Spinner"
+                    data-testid="loader"
+                />
+                </div>
+
+
+            </div>:null
+            }
         </div>
     );
 }

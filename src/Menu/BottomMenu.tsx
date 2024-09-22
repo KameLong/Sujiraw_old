@@ -1,15 +1,29 @@
-import {Button, Modal} from "@mui/material";
+import {Button, Card, CardContent, List, ListItem, Modal} from "@mui/material";
 import React, {forwardRef, useState} from "react";
 import {RouteSelectView, RouteSelectViewProps} from "./RouteSelectView";
 import {useNavigate} from "react-router-dom";
 import {RouteInfo} from "../DiaData/DiaData";
+import css from './menu.module.scss';
 
 interface BottomMenuProps {
     routeID:number;
     routeInfo:{[key:number]:RouteInfo};
 }
+
+
+const cardStyle = {
+    position: "absolute" as "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: 400,
+    boxShadow: 24,
+    p: 4,
+};
+
 export function BottomMenu({routeID,routeInfo}:BottomMenuProps){
     const [openRouteSelect,setOpenRouteSelect]=useState<boolean>(false);
+    const [openMainMenu,setOpenMainMenu]=useState<boolean>(false);
     const navigate=useNavigate();
 
     const RouteSelectViewWithRef = forwardRef((props: RouteSelectViewProps, ref) => {
@@ -19,8 +33,8 @@ export function BottomMenu({routeID,routeInfo}:BottomMenuProps){
     return (
         <div style={{display: "flex", position: 'fixed', zIndex:100,bottom: 0, width: '100%', backgroundColor: "#FFF"}}>
             <Button sx={{m: 1}} variant={"contained"} style={{width: 0, flexGrow: 1, textAlign: 'center'}}
-                    onClick={() => setOpenRouteSelect(true)}>
-                路線
+                    onClick={() => setOpenMainMenu(true)}>
+                メニュー
             </Button>
             <Button sx={{m: 1}} variant={"contained"} style={{width: 0, flexGrow: 1, textAlign: 'center'}}
                     onClick={() => {
@@ -61,6 +75,50 @@ export function BottomMenu({routeID,routeInfo}:BottomMenuProps){
             {/*<svg viewBox="0 0 64 64" width="48" height="48" stroke={"#52a8ff"} strokeWidth={2} style={{backgroundColor:'black'}}>*/}
             {/*    <path d="M8 8 l10 12 l12 0 l26 36 M56 8 l-12 24 l-8 0 l-12 24 M8 30 l12 0l11 -22" ></path>*/}
             {/*</svg>*/}
+            <Modal
+                id={"mainMenu"}
+                open={openMainMenu}
+                onClose={() => setOpenMainMenu(false)}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+            >
+                <Card
+                     // style={{margin: '10px 10px 50px 10px', height: 'calc(100% - 60px)'}}
+                    style={cardStyle}
+                >
+                    <CardContent>
+
+                    <List>
+                    <ListItem　
+                        onClick={()=>{
+                            setOpenRouteSelect(true);
+                            setOpenMainMenu(false);
+                        }}
+                    className={css.menuItem}>
+                        路線選択
+                    </ListItem>
+                        <ListItem
+                            onClick={()=>{
+                                // setOpenRouteSelect(true);
+                                setOpenMainMenu(false);
+                            }}
+                            className={css.menuItem}>
+                            OuDiaファイルを開く(未実装)
+                        </ListItem>
+                    <ListItem
+                        onClick={()=>{
+                            navigate(`/TimeTablePDF/${routeID}`);
+
+                        }}
+                        className={css.menuItem}>
+                        時刻表をPDFにする
+                    </ListItem>
+
+                </List>
+                    </CardContent>
+                </Card>
+
+            </Modal>
             <Modal
                 id={"routeSelect"}
                 open={openRouteSelect}
