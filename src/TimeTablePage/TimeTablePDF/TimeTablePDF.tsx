@@ -2,10 +2,20 @@ import React, {memo, useCallback, useEffect, useRef, useState} from 'react';
 import {useNavigate, useParams} from "react-router-dom";
 import PDFStationView from "./PDFStationView";
 import PDFTripView from './PDFTripView';
+import {isMobile} from 'react-device-detect';
 
-
-import {Page, PDFViewer, Document, Font,StyleSheet,View} from "@react-pdf/renderer";
-import {Button, Dialog, DialogContent, Fab, TextField} from "@mui/material";
+import {Page, PDFViewer, Document, Font, StyleSheet, View, PDFDownloadLink} from "@react-pdf/renderer";
+import {
+    Backdrop,
+    Button,
+    CircularProgress,
+    Dialog,
+    DialogContent,
+    Fab,
+    Modal,
+    TextField,
+    Typography
+} from "@mui/material";
 import { styled } from '@mui/system';
 import {Settings} from "@mui/icons-material";
 import Box from "@mui/material/Box";
@@ -22,6 +32,18 @@ const CustomDialog = styled(Dialog)({
         margin: '5px',
     },
 });
+const style = {
+    position: 'absolute' as 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: 400,
+    bgcolor: 'background.paper',
+    border: '2px solid #000',
+    boxShadow: 24,
+    p: 4,
+};
+
 const TimeTablePDF22=memo(TimeTablePDF2);
 const TimeTablePdfOrder2=memo(TimeTablePdfOrder);
 export function TimeTablePDF() {
@@ -37,6 +59,8 @@ export function TimeTablePDF() {
 
     const param = useParams<{ routeID:string,direct: string  }>();
     const routeID=parseInt(param.routeID??"0");
+
+    const [openDownloadModal, setOpenDownloadModal] = useState(false);
 
 
 
@@ -95,17 +119,11 @@ export function TimeTablePDF() {
     });
 
 
-
-
-
-
-
-
-
-
-
-
-
+    useEffect(() => {
+        if(!loading){
+            setOpenDownloadModal(true);
+        }
+    }, [loading]);
 
 
     useEffect(() => {
@@ -140,33 +158,38 @@ export function TimeTablePDF() {
                     setSettingOpen(false);
                 })}></SettingView>
             </CustomDialog>
-            <PDFViewer style={{height:'calc(100% - 10px)',width:'100%'}} >
-                {layout.orderType===OrderType.ALTERNATELY?
-                    <TimeTablePDF22 route={route} layout={layout} stations={stations} trainTypes={trainTypes} onRender={finishRender}/>
-                    :
-                    <TimeTablePdfOrder2 route={route} layout={layout} stations={stations} trainTypes={trainTypes} onRender={finishRender}/>
-                }
-            </PDFViewer>
-            {loading?
-            <div style={{position:"fixed",height:'100%',
-                width:'100%',top:'0',  display: 'flex',
-                alignItems: 'center',
-            background:'#8888'}}>
-                <div
-                    style={{margin:'0 auto',width:'150px',height:'150px'}}
-                >
-                <ClipLoader
-                    color={"#F00"}
-                    loading={true}
-                    size={150}
-                    aria-label="Loading Spinner"
-                    data-testid="loader"
-                />
-                </div>
+            {isMobile?
+                        <PDFDownloadLink
+                            style={{fontSize:20}}
+                            document={layout.orderType===OrderType.ALTERNATELY?
+                                    <TimeTablePDF22 route={route} layout={layout} stations={stations} trainTypes={trainTypes} onRender={finishRender}/>
+                                    :
+                                    <TimeTablePdfOrder2 route={route} layout={layout} stations={stations} trainTypes={trainTypes} onRender={finishRender}/>
 
+                            }
+                            fileName={`${route.name}.pdf`}
 
-            </div>:null
+                        >
+                            {({ loading }) =>
+                                loading ? "Loading...": "PDF ready for download"
+                            }
+                        </PDFDownloadLink>
+:                    <PDFViewer style={{height:'calc(100% - 10px)',width:'100%'}} >
+                        {layout.orderType===OrderType.ALTERNATELY?
+                            <TimeTablePDF22 route={route} layout={layout} stations={stations} trainTypes={trainTypes} onRender={finishRender}/>
+                            :
+                            <TimeTablePdfOrder2 route={route} layout={layout} stations={stations} trainTypes={trainTypes} onRender={finishRender}/>
+                        }
+                    </PDFViewer>
             }
+            <Backdrop
+                sx={(theme) => ({ color: '#fff', zIndex: theme.zIndex.drawer + 1 })}
+                open={loading}
+            >
+                <CircularProgress color="inherit" />
+            </Backdrop>
+
+
         </div>
     );
 }

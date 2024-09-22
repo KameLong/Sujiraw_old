@@ -63,7 +63,7 @@ export function TimeTablePDF2(
         >{
             getPage2().map(page=>
 
-            <Page size="A4" style={styles.tableCell}>
+            <Page size="A4" key={page} style={styles.tableCell}>
 
             {
                 getPage(page).map((_,i)=> {
