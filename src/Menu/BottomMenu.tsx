@@ -6,8 +6,8 @@ import {RouteInfo} from "../DiaData/DiaData";
 import css from './menu.module.scss';
 
 interface BottomMenuProps {
-    routeID:number;
-    routeInfo:{[key:number]:RouteInfo};
+    routeID:number|undefined;
+    routeInfo:{[key:number]:RouteInfo}|undefined;
 }
 
 
@@ -37,6 +37,7 @@ export function BottomMenu({routeID,routeInfo}:BottomMenuProps){
                 メニュー
             </Button>
             <Button sx={{m: 1}} variant={"contained"} style={{width: 0, flexGrow: 1, textAlign: 'center'}}
+                    disabled={routeID===undefined}
                     onClick={() => {
                         navigate(`/TimeTable/${routeID}/0`);
                     }}>
@@ -52,6 +53,7 @@ export function BottomMenu({routeID,routeInfo}:BottomMenuProps){
             {/*    <line x1="23" x2="8" y1="11" y2="22"></line>*/}
             {/*</svg>*/}
             <Button sx={{m: 1}} variant={"contained"} style={{width: 0, flexGrow: 1, textAlign: 'center'}}
+                    disabled={routeID===undefined}
                     onClick={() => {
                         navigate(`/TimeTable/${routeID}/1`);
                     }}>
@@ -67,6 +69,7 @@ export function BottomMenu({routeID,routeInfo}:BottomMenuProps){
             {/*    <line x1="41" x2="56" y1="11" y2="22"></line>*/}
             {/*</svg>*/}
             <Button sx={{m: 1}} variant={"contained"} style={{width: 0, flexGrow: 1, textAlign: 'center'}}
+                    disabled={routeID===undefined}
                     onClick={() => {
                         navigate(`/Diagram/${routeID}`);
                     }}>
@@ -89,14 +92,17 @@ export function BottomMenu({routeID,routeInfo}:BottomMenuProps){
                     <CardContent>
 
                     <List>
-                    <ListItem　
-                        onClick={()=>{
-                            setOpenRouteSelect(true);
-                            setOpenMainMenu(false);
-                        }}
-                    className={css.menuItem}>
-                        路線選択
-                    </ListItem>
+                        {
+                            routeInfo!==undefined?
+                                <ListItem
+                                    onClick={()=>{
+                                        setOpenRouteSelect(true);
+                                        setOpenMainMenu(false);
+                                    }}
+                                    className={css.menuItem}>
+                                    路線選択
+                                </ListItem> :null
+                        }
                         <ListItem
                             onClick={()=>{
                                 // setOpenRouteSelect(true);
@@ -105,31 +111,45 @@ export function BottomMenu({routeID,routeInfo}:BottomMenuProps){
                             className={css.menuItem}>
                             OuDiaファイルを開く(未実装)
                         </ListItem>
-                    <ListItem
-                        onClick={()=>{
-                            navigate(`/TimeTablePDF/${routeID}`);
+                        {routeID!==undefined?
+                            <ListItem
+                                onClick={()=>{
+                                    navigate(`/TimeTablePDF/${routeID}`);
 
-                        }}
-                        className={css.menuItem}>
-                        時刻表をPDFにする
-                    </ListItem>
+                                }}
+                                className={css.menuItem}>
+                                時刻表をPDFにする
+                            </ListItem>:null
+                        }
+
+                        <ListItem
+                            onClick={()=>{
+                                navigate(`/LICENSE`);
+
+                            }}
+                            className={css.menuItem}>
+                            LICENSE
+                        </ListItem>
 
                 </List>
                     </CardContent>
                 </Card>
 
             </Modal>
-            <Modal
-                id={"routeSelect"}
-                open={openRouteSelect}
-                onClose={() => setOpenRouteSelect(false)}
-                aria-labelledby="modal-modal-title"
-                aria-describedby="modal-modal-description"
-            >
-                <RouteSelectViewWithRef routes={routeInfo} closeModal={() => {
-                    setOpenRouteSelect(false)
-                }}/>
-            </Modal>
+            {routeInfo!==undefined?
+                <Modal
+                    id={"routeSelect"}
+                    open={openRouteSelect}
+                    onClose={() => setOpenRouteSelect(false)}
+                    aria-labelledby="modal-modal-title"
+                    aria-describedby="modal-modal-description"
+                >
+                    <RouteSelectViewWithRef routes={routeInfo} closeModal={() => {
+                        setOpenRouteSelect(false)
+                    }}/>
+                </Modal>
+                :null
+            }
 
         </div>
 )

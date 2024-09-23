@@ -1,6 +1,7 @@
 {
   "common": {
-    "fontSize": "フォントサイズ"
+    "fontSize": "フォントサイズ",
+    "appName": "Sujiraw"
   },
   "timetablePDF":{
     "tripInParagraph": "1段の列車数",
@@ -9,5 +10,10 @@
     "arrangement": "時刻表の配置",
     "alternately": "下り/上り交互に配置",
     "order": "まとめて配置"
+  },
+  "license": {
+    "license": "ライセンス",
+    "otherLicenses(npm)": "他のライセンス(npm)",
+    "thisLicense": "はAGPLライセンスで公開しています。"
   }
 }
