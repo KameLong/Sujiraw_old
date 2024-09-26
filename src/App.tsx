@@ -5,6 +5,7 @@ import {BrowserRouter, Route, Routes } from 'react-router-dom';
 import DiagramPage from "./Diagram/DiagramPage";
 import { TimeTablePDF } from './TimeTablePage/TimeTablePDF/TimeTablePDF';
 import {LicensePage} from "./Help/LicensePage";
+import {DiagramPDFPage} from "./Diagram/DiagramPDF/DiagramPDFPage";
 
 function App() {
   return (
@@ -21,6 +22,9 @@ function App() {
           }></Route>
           <Route path="/Diagram/:routeID" element={
               <DiagramPage/>
+          }></Route>
+          <Route path="/DiagramPDF/:routeID" element={
+              <DiagramPDFPage/>
           }></Route>
           <Route path="/License" element={
               <LicensePage/>

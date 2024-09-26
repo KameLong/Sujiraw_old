@@ -101,10 +101,6 @@ export function TimeTablePDF() {
     },[]);
 
 
-
-
-
-
     const [layout,setLayout]=useState<TimetablePDFSetting>({
         tripInParagraph:20,
         paragraphPerPage:2,
