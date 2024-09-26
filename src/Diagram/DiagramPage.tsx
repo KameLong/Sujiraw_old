@@ -6,6 +6,7 @@ import {useParams} from "react-router-dom";
 import {Company, fetchGzipJson, Route, RouteInfo, Station, StopTime, Train, TrainType} from "../DiaData/DiaData";
 import {DiagramCanvas, DiagramLine, DiagramTransformC, Point} from "./DiagramCanvas";
 import {BottomMenu} from "../Menu/BottomMenu";
+import {useDiagramHook} from "./DiagramHook";
 
 
 
@@ -36,12 +37,8 @@ const zoomY:Gesture={
 function DiagramPage() {
     const params = useParams<{ routeID: string }>();
     const routeID = Number.parseInt(params.routeID??"0");
+    const {routeStations, downLines, upLines, routeInfo} = useDiagramHook(routeID);
 
-    const [stations, setStations] = useState<{[key:number]:Station}>({});
-    const [trainTypes, setTrainTypes] = useState<{[key:number]:TrainType}>({});
-    const [trains, setTrains] = useState<{[key:number]:Train}>({});
-    const [routeInfo, setRouteInfo] = useState<{[key:number]:RouteInfo}>({});
-    const [routes, setRoutes] = useState<{[key:number]:Route}>({});
     const SCALE:number=window.devicePixelRatio;
 
     function Ypos(diagramRect:DiagramRect){
@@ -52,113 +49,26 @@ function DiagramPage() {
         }
         return newY;
     }
-    async function  loadRoute(id:number):Promise<Route>{
-        return await fetchGzipJson(`/route_${id}.json.gz`) as Route;
-    }
-    async function loadCompany():Promise<Company>{
-        return await fetchGzipJson(`/company.json.gz`);
-    }
-
-
-    const [routeStations, setRouteStations] = useState<DiagramStation[]>([]);
-    const [downTrips, setDownTrips] = useState<DiagramTrip[]>([]);
-    const [upTrips, setUpTrips] = useState<DiagramTrip[]>([]);
     const [diagramCanvas,setDiagramCanvas]=useState<DiagramCanvas>(new DiagramCanvas(undefined));
-
-
-    const [downLines,setDownLines]=useState<DiagramLine[]>([]);
-    const [upLines,setUpLines]=useState<DiagramLine[]>([]);
     useEffect(() => {
-        loadCompany().then((company)=>{
-            setStations(company.stations);
-            setTrainTypes(company.trainTypes);
-            setTrains(company.trains);
-            setRouteInfo(company.routes);
-
-            return  loadRoute(routeID);
-        }).then((route)=>{
-            setRoutes(prev=>{return {...prev,[routeID]:route}});
-        });
-    }, [routeID]);
-    useEffect(() => {
-        const route=routes[routeID];
-        if(route===undefined){
+        if(routeStations.length===0){
             return;
         }
-        const rs=route.routeStations.map((item,_i)=>{
-            return {...item,stationTime:_i*120,station:stations[item.stationID]}
-        });
-        setRouteStations(rs);
-        const downTrips=route.downTrips.map(item=>{
-            return {...item,stopTimes:item.times.map(item=>{
-                    return {...item,depTime:getDA(item),ariTime:getAD(item)}
-                }),trainType:trainTypes[item.trainTypeID]
-            }
-        });
-        setDownTrips(downTrips);
-        const upTrips=route.upTrips.map(item=>{
-            return {...item,stopTimes:item.times.map(item=>{
-                    return {...item,depTime:getDA(item),ariTime:getAD(item)}
-                }),trainType:trainTypes[item.trainTypeID]
-            }
-        });
-        setUpTrips(upTrips);
         setDiaRect(prevState => {
             return {
                 xStart: prevState.xStart,
                 xEnd: prevState.xEnd,
-                yStart: rs[0].stationTime,
-                yEnd: rs.slice(-1)[0].stationTime
+                yStart: routeStations[0].stationTime,
+                yEnd: routeStations.slice(-1)[0].stationTime
             }
         })
-    }, [routes]);
-
-
-    const makeDiagramLine=(trips:DiagramTrip[]):DiagramLine[]=>{
-        const diagramLines:DiagramLine[]=[];
-        trips.forEach(trip=>{
-
-            let diagramLine:DiagramLine={
-                color:trip.trainType.color,
-                points:[],
-                number:"",
-            };
-            const stopTimes=trip.direction===0?trip.stopTimes:trip.stopTimes.slice().reverse();
-            for(let i=0;i<stopTimes.length;i++){
-                const st=stopTimes[i];
-                if(st.ariTime>=0){
-                    diagramLine.points.push({
-                        x:st.ariTime,
-                        y:routeStations.filter(item=>item.rsID===st.rsID)[0].stationTime
-                    });
-                }
-                if(st.depTime>=0) {
-                    diagramLine.points.push({
-                        x: st.depTime,
-                        y:routeStations.filter(item=>item.rsID===st.rsID)[0].stationTime
-                    });
-                }
-            }
-            diagramLines.push(diagramLine);
-        })
-        return diagramLines;
-
-    }
-
-
+    }, [routeStations]);
     const [diaRect,setDiaRect]=useState<DiagramRect>({
         yStart:0,
         yEnd:0,
         xStart:3600*3,
         xEnd:3600*27
     });
-
-    useEffect(()=>{
-        setDownLines(makeDiagramLine(downTrips));
-    },[downTrips])
-    useEffect(()=>{
-        setUpLines(makeDiagramLine(upTrips));
-    },[upTrips])
 
     useEffect(() => {
         const canvas=(document.getElementById("canvas") as  HTMLCanvasElement);
@@ -336,18 +246,7 @@ console.log(transform.xScale);
 
 export default DiagramPage;
 
-const getAD = (stopTime: StopTime) => {
-    if (stopTime.ariTime >= 0) {
-        return stopTime.ariTime;
-    }
-    return stopTime.depTime;
-}
-const getDA=(stopTime:StopTime)=>{
-    if(stopTime.depTime>=0){
-        return stopTime.depTime;
-    }
-    return stopTime.ariTime;
-}
+
 const hasTime=(stopTime:StopTime)=>{
     return stopTime.depTime>=0||stopTime.ariTime>=0;
 }
