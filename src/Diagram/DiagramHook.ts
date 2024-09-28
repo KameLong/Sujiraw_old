@@ -1,5 +1,5 @@
 import {useEffect, useState} from "react";
-import {loadCompany, loadRoute, RouteInfo, StopTime} from "../DiaData/DiaData";
+import {GetStopTime, loadCompany, loadRoute, RouteInfo, StopTime, StopType} from "../DiaData/DiaData";
 import {DiagramStation, DiagramTrip} from "./DiagramData";
 import {DiagramLine} from "./DiagramCanvas";
 
@@ -62,9 +62,58 @@ export function useDiagramHook(routeID:number){
 
             const route=await loadRoute(routeID);
             //routeの処理
-            const rs=route.routeStations.map((item,_i)=>{
-                return {...item,stationTime:_i*120,station:stations[item.stationID]}
-            });
+            const rs:DiagramStation[]=[];
+            rs.push({...route.routeStations[0],stationTime:0,station:stations[route.routeStations[0].stationID]});
+            let nowStationTime=0;
+            for(let i=1;i<route.routeStations.length;i++){
+                const stationID=route.routeStations[i].stationID;
+                const station=stations[stationID];
+                let minTime=24*3600;
+                //downTripの中で所要時間探索
+                for(let j=0;j<route.downTrips.length;j++){
+                    const trip=route.downTrips[j];
+                    const stopTimes=trip.times;
+                    if(GetStopTime.TimeExist(stopTimes[i])&&GetStopTime.TimeExist(stopTimes[i-1])){
+                        let t=GetStopTime.GetAriDepTime(trip.times[i])-GetStopTime.GetDepAriTime(trip.times[i-1]);
+                        if(trip.times[i].stopType!==StopType.STOP){
+                            t+=30;
+                        }
+                        if(trip.times[i-1].stopType!==StopType.STOP){
+                            t+=30;
+                        }
+                        minTime=Math.min(minTime,t);
+                    }
+                }
+                //upTripの中で所要時間探索
+                for(let j=0;j<route.upTrips.length;j++){
+                    const trip=route.upTrips[j];
+                    const stopTimes=trip.times;
+                    if(GetStopTime.TimeExist(stopTimes[i])&&GetStopTime.TimeExist(stopTimes[i-1])){
+                        let t=GetStopTime.GetAriDepTime(trip.times[i-1])-GetStopTime.GetDepAriTime(trip.times[i]);
+                        if(trip.times[i].stopType!==StopType.STOP){
+                            t+=30;
+                        }
+                        if(trip.times[i-1].stopType!==StopType.STOP){
+                            t+=30;
+                        }
+                        minTime=Math.min(minTime,t);
+                    }
+                }
+                if(minTime===24*3600){
+                    minTime=90;
+                }
+                if(minTime<90){
+                    minTime=90;
+                }
+                nowStationTime=nowStationTime+minTime;
+
+
+
+                rs.push({...route.routeStations[i],stationTime:nowStationTime,station:station});
+            }
+
+
+
             setRouteStations(rs);
             const downTrips=route.downTrips.map(item=>{
                 return {...item,stopTimes:item.times.map(item=>{
