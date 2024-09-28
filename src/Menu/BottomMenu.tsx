@@ -121,6 +121,16 @@ export function BottomMenu({routeID,routeInfo}:BottomMenuProps){
                                 時刻表をPDFにする
                             </ListItem>:null
                         }
+                        {routeID!==undefined?
+                            <ListItem
+                                onClick={()=>{
+                                    navigate(`/DiagramPDF/${routeID}`);
+
+                                }}
+                                className={css.menuItem}>
+                                ダイヤグラムをPDFにする
+                            </ListItem>:null
+                        }
 
                         <ListItem
                             onClick={()=>{

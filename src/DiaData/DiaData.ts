@@ -33,7 +33,7 @@ export async function loadCompany():Promise<Company>{
 }
 
 
-enum StopType {
+export enum StopType {
     NONE = 0,
     STOP = 1,
     PASS = 2,
