@@ -15,14 +15,12 @@ import {isMobile} from 'react-device-detect';
 
 const CustomDialog = styled(Dialog)({
     '& .MuiDialog-paper': {
-        // Add your custom styles here
-        width: '800px', // Example: set the width to 80%
+        width: '800px',
         margin: '5px',
     },
 });
-
-
 const MemoDiagramPDFDocument=memo(DiagramPDFDocument);
+
 export function DiagramPDFPage(){
     const param = useParams<{ routeID:string }>();
     const routeID=parseInt(param.routeID??"0");
@@ -41,21 +39,13 @@ export function DiagramPDFPage(){
         diagramInPage:2
 
     });
-
-
     const [settingOpen,setSettingOpen]=useState(false);
-
 
     const {routeStations, downLines, upLines, routeInfo} = useDiagramHook(routeID);
 
     if(routeStations.length===0){
         return <div>loading...</div>
     }
-
-
-
-
-
     return (
         <div style={{height: '100%', width: '100%'}}>
             <Box sx={{'& > :not(style)': {m: 1}, position: 'fixed', bottom: 20, right: 20}}>
@@ -63,41 +53,37 @@ export function DiagramPDFPage(){
                     <Settings />
                 </Fab>
             </Box>
-            <CustomDialog open={settingOpen} onClose={e=>{
-                setSettingOpen(false);
-            }}
-                          maxWidth="lg"
+            <CustomDialog
+                open={settingOpen} onClose={e=>{
+                    setSettingOpen(false);
+                }}
+                maxWidth="lg"
             >
-
-                <DiagramPDFSettingView layout={layout}
-                             setLayout={(data=>{
-                                 setLayout(data);
-                                 setSettingOpen(false);
-                             })}></DiagramPDFSettingView>
+            <DiagramPDFSettingView
+                layout={layout}
+                setLayout={(data=>{
+                    setLayout(data);
+                    setSettingOpen(false);
+                })}>
+            </DiagramPDFSettingView>
             </CustomDialog>
             {isMobile?
                 <PDFDownloadLink
                     style={{fontSize:20}}
-                document={
-                <DiagramPDFDocument upLines={upLines} downLines={downLines} routeStations={routeStations} routeInfo={routeInfo} layout={layout}/>
-                }
-                fileName={`Diagram_${routeInfo[routeID].name}.pdf`}
-            >
-                {({ loading }) =>
-                    loading ? "Loading...": "PDF ready for download"
-                }
-            </PDFDownloadLink>
+                    document={
+                        <DiagramPDFDocument upLines={upLines} downLines={downLines} routeStations={routeStations} routeInfo={routeInfo} layout={layout}/>
+                    }
+                    fileName={`Diagram_${routeInfo[routeID].name}.pdf`}
+                >
+                    {({ loading }) =>
+                        loading ? "Loading...": "PDF ready for download"
+                    }
+                </PDFDownloadLink>
                 :
                 <PDFViewer style={{width: '100%', height: '100%'}}>
                     <MemoDiagramPDFDocument upLines={upLines} downLines={downLines} routeStations={routeStations} routeInfo={routeInfo} layout={layout}/>
                 </PDFViewer>
             }
-
-
-
-
         </div>
-            );
-
-
-            }
+    );
+}

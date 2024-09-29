@@ -1,21 +1,13 @@
 import {
     Button,
-    Checkbox,
-    FormControl,
-    FormControlLabel,
-    FormGroup,
     FormLabel,
     Grid, MenuItem,
-    Radio,
-    RadioGroup, Select, Stack,
+    Select, Stack,
     TextField
 } from "@mui/material";
 import {useTranslation} from "react-i18next";
 import React, {useState} from "react";
-import {Check, CheckBox} from "@mui/icons-material";
-import {Controller, Form, SubmitHandler, useForm} from "react-hook-form";
-import {StaticDateTimePicker, LocalizationProvider, DateTimePicker, TimePicker} from '@mui/x-date-pickers/';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import {Controller, SubmitHandler, useForm} from "react-hook-form";
 
 export interface DiagramPDFSetting{
     fontSize:number,
@@ -26,20 +18,16 @@ export interface DiagramPDFSetting{
     diagramHeight:number,
     diagramStartTime:string,
     diagramSpan:string,
-
     diagramAxisType:number,
     diagramInPage:number,
-
     lineColor:string,
     lineWidth:number
 }
-
 
 export interface DiagramPDFSettingProps {
     layout: DiagramPDFSetting;
     setLayout: (layout: DiagramPDFSetting) => void;
 }
-
 
 export function DiagramPDFSettingView({layout,setLayout}:DiagramPDFSettingProps){
     const {t, i18n} = useTranslation();
@@ -90,43 +78,15 @@ export function DiagramPDFSettingView({layout,setLayout}:DiagramPDFSettingProps)
             required: '正の数字を入力してください',
             pattern: {value: /^\d+(?:.\d+)?$/, message: '正の数を入力してください。'}
         },
-
-
-        // tripInParagraph: {
-        //     required: '正の整数を入力してください',
-        //     pattern: {value: /^\d+$/, message: '正の整数を入力してください。'}
-        // },
-        // lineHeight: {
-        //     required: '正の数字を入力してください',
-        //     pattern: {value: /^\d+(?:.\d+)?$/, message: '正の数を入力してください。'}
-        // },
-        // paragraphPerPage: {
-        //     required: '正の整数を入力してください',
-        //     pattern: {value: /^\d+$/, message: '正の整数を入力してください。'}
-        // },
-        // leftPadding: {
-        //     required: '正の数字を入力してください',
-        //     pattern: {value: /^\d+(?:.\d+)?$/, message: '正の数を入力してください。'}
-        // },
-        // rightPadding: {
-        //     required: '正の数字を入力してください',
-        //     pattern: {value: /^\d+(?:.\d+)?$/, message: '正の数を入力してください。'}
-        // },
-
-
-
     }
 
     const onSubmit: SubmitHandler<DiagramPDFSetting> = (data: DiagramPDFSetting) => {
-        //stateに保存する
         setLayout(data);
-
     }
     return (
         <Stack component="form" noValidate
                onSubmit={handleSubmit(onSubmit)}
                >
-
         <Grid container spacing={2} alignItems='center' justifyContent='center' sx={{py:3}}>
             <Grid item xs={12} md={6}>
                 <div style={{width: '360px', height: '510px', margin: '10px auto', position: 'relative'}}>
@@ -304,20 +264,7 @@ export function DiagramPDFSettingView({layout,setLayout}:DiagramPDFSettingProps)
                             />
                         )}
                     />
-                    {/*<Controller*/}
-                    {/*    name="diagramInPage"*/}
-                    {/*    control={control}*/}
-                    {/*    render={({ field, fieldState }) => (*/}
-                    {/*        <TextField*/}
-                    {/*            type="number"*/}
-                    {/*            {...field}*/}
-                    {/*            label={t("diagram.paragraphPerPage")}*/}
-                    {/*            error={fieldState.invalid}*/}
-                    {/*            helperText={fieldState.error?.message}*/}
 
-                    {/*        />*/}
-                    {/*    )}*/}
-                    {/*/>*/}
                     <Controller
                         name="diagramAxisType"
                         control={control}
@@ -341,72 +288,12 @@ export function DiagramPDFSettingView({layout,setLayout}:DiagramPDFSettingProps)
                             </Select>
                         )}
                     />
-
-
-
-                    {/*<LocalizationProvider dateAdapter={AdapterDayjs}>*/}
-                    {/*    <TimePicker*/}
-                    {/*    label="Select Time"*/}
-                    {/*/>*/}
-                    {/*</LocalizationProvider>*/}
-
-
-                    {/*<Controller*/}
-                    {/*    name="tripInParagraph"*/}
-                    {/*    control={control}*/}
-                    {/*    rules={validationRules.tripInParagraph}*/}
-                    {/*    render={({ field, fieldState }) => (*/}
-                    {/*        <TextField*/}
-                    {/*            {...field}*/}
-                    {/*            type="text"*/}
-                    {/*            label={t("timetablePDF.tripInParagraph")}*/}
-                    {/*            error={fieldState.invalid}*/}
-                    {/*            helperText={fieldState.error?.message}*/}
-                    {/*        />*/}
-                    {/*    )}*/}
-                    {/*/>*/}
-                    {/*<Controller*/}
-                    {/*    name="lineHeight"*/}
-                    {/*    control={control}*/}
-                    {/*    rules={validationRules.lineHeight}*/}
-                    {/*    render={({ field, fieldState }) => (*/}
-                    {/*        <TextField*/}
-                    {/*            {...field}*/}
-                    {/*            type="text"*/}
-                    {/*            label={t("timetablePDF.lineHeight")}*/}
-                    {/*            error={fieldState.invalid}*/}
-                    {/*            helperText={fieldState.error?.message}*/}
-                    {/*        />*/}
-                    {/*    )}*/}
-                    {/*/>*/}
-                    {/*<Controller*/}
-                    {/*    name="paragraphPerPage"*/}
-                    {/*    control={control}*/}
-                    {/*    rules={validationRules.paragraphPerPage}*/}
-                    {/*    render={({ field, fieldState }) => (*/}
-                    {/*        <TextField*/}
-                    {/*            {...field}*/}
-                    {/*            type="text"*/}
-                    {/*            label={t("timetablePDF.paragraphPerPage")}*/}
-                    {/*            error={fieldState.invalid}*/}
-                    {/*            helperText={fieldState.error?.message}*/}
-                    {/*        />*/}
-                    {/*    )}*/}
-                    {/*/>*/}
-
-
-
-
-
                     <Button variant="contained" type="submit">
                         決定する
                     </Button>
                 </Stack>
-
             </Grid>
-
         </Grid>
-        </Stack>
-
-    )
+    </Stack>
+)
 }
