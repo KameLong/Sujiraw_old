@@ -6,13 +6,15 @@ import DiagramPage from "./Diagram/DiagramPage";
 import { TimeTablePDF } from './TimeTablePage/TimeTablePDF/TimeTablePDF';
 import {LicensePage} from "./Help/LicensePage";
 import {DiagramPDFPage} from "./Diagram/DiagramPDF/DiagramPDFPage";
+import {OuDiaOpenDialog} from "./Menu/OuDiaOpenDialog";
 
 function App() {
   return (
       <BrowserRouter>
       <Routes>
         <Route path="/" element={
-          <TimeTablePage/>
+          // <TimeTablePage/>
+            <OuDiaOpenDialog/>
         }/>
           <Route path="/TimeTable/:routeID/:direct" element={
               <TimeTablePage/>

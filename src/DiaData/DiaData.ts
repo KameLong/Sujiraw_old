@@ -191,6 +191,10 @@ export class GetTrip {
         return -1;
     }
 
+    /**
+     * Tripの中の始発駅を返します。
+     * return routeStationのindex
+     */
     public static GetBeginStationIndex(trip: Trip) {
         switch (trip.direction) {
             case 0:
@@ -201,6 +205,10 @@ export class GetTrip {
         return -1;
     }
 
+    /**
+     * Tripの中の終着駅を返します。
+     * return routeStationのindex
+     */
     public static GetEndStationIndex(trip: Trip) {
         switch (trip.direction) {
             case 0:
