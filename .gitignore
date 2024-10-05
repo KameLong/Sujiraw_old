@@ -1,0 +1,17 @@
+/.vs
+/.github
+/Sujiraw.WebAPI/bin
+/Sujiraw.WebAPI/obj
+/Sujiraw.WebAPI/wwwroot/
+/Sujiraw.WebAPI/appsettings.json
+
+/Sujiraw.FE/.vscode
+/Sujiraw.FE/.idea
+/Sujiraw.FE/build
+/Sujiraw.FE/node_modules
+/Sujiraw.FE/.env
+
+/Test.WebAPI
+/TestProj
+
+
