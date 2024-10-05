@@ -15,11 +15,12 @@ export function RouteSelectView({routes, closeModal}: RouteSelectViewProps) {
                 <Typography gutterBottom variant="h5" component="div">
                     路線を選択してください
                 </Typography>
-                <List style={{overflowY: 'auto'}}>
+                <List style={{overflowY: 'auto',maxHeight: 600}}
+                >
                     {Object.keys(routes).map((key) =>
                         <div key={key}>
-                            <Box key={key} style={{padding: '0px 0px 0px 30px'}}>
-                                <Typography variant="h6" component="div" onClick={() => {
+                            <Box key={key} style={{padding: '0px 0px 0px 10px'}}>
+                                <Typography  component="div" onClick={() => {
                                     console.log(routes[parseInt(key)]);
                                     navigate(`/TimeTable/${routes[parseInt(key)].routeID}/0`);
                                     closeModal();
